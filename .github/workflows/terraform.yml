@@ -1,0 +1,50 @@
+name: 'Terraform Infrastructure'
+
+on:
+  push:
+    branches: ['main', 'production']
+  pull_request:
+    branches: ['main']
+
+permissions:
+  contents: 'read'
+  id-token: 'write'
+
+jobs:
+  terraform:
+    name: 'Terraform Plan and Apply'
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        shell: bash # Sử dụng bash shell để chạy các lệnh Terraform
+
+    steps:
+      # 1. Checkout code from the repository
+      - name: Checkout
+        uses: actions/checkout@v4
+        # 2. Configure AWS credentials using the role ARN stored in GitHub Secrets
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }} # Secret bạn đã tạo ở GitHub
+          aws-region: us-east-1
+        # 3. Setup Terraform CLI
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        # 4. Initialize Terraform
+      - name: Terraform Init
+        run: terraform init
+        # 5. Format Terraform files
+      - name: Terraform Format
+        run: terraform fmt -check # -check có nghĩa là chỉ kiểm tra định dạng mà không sửa lỗi, nếu có lỗi sẽ làm cho bước này thất bại
+        # 6. Validate Terraform configuration
+      - name: Terraform Validate
+        run: terraform validate
+        # 7. Plan Terraform changes
+      - name: Terraform Plan
+        run: terraform plan -input=false -out=tfplan # -out=tfplan sẽ lưu kế hoạch vào file tfplan để sử dụng ở bước apply sau này
+        # 8. Apply Terraform changes (chỉ khi merge vào production)
+      - name: Terraform Apply
+        if: github.ref == 'refs/heads/production' && github.event_name == 'push'
+        run: terraform apply -input=false tfplan # -tfplan sẽ áp dụng kế hoạch đã được lưu ở bước plan trước đó
