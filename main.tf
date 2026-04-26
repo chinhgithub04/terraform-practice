@@ -1,9 +1,10 @@
-resource "aws_vpc" "this" {
-  cidr_block       = var.vpc_cidr
-  instance_tenancy = "default"
+module "vpc" {
+  source = "./modules/vpc"
 
-  tags = {
-    Name      = "${var.project_name}-vpc"
-    ManagedBy = "Terraform"
-  }
+  project_name         = var.project_name
+  aws_region           = var.aws_region
+  availability_zones   = var.availability_zones
+  vpc_cidr             = var.vpc_cidr
+  public_subnet_cidrs  = var.public_subnet_cidrs
+  private_subnet_cidrs = var.private_subnet_cidrs
 }
