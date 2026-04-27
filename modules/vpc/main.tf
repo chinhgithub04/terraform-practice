@@ -1,7 +1,9 @@
 # 1. VPC
 resource "aws_vpc" "this" {
-  cidr_block       = var.vpc_cidr
-  instance_tenancy = "default"
+  cidr_block           = var.vpc_cidr
+  instance_tenancy     = "default"
+  enable_dns_hostnames = true
+  enable_dns_support   = true
 
   tags = {
     Name      = "${var.project_name}-vpc"
@@ -27,7 +29,7 @@ resource "aws_subnet" "public" {
   map_public_ip_on_launch = true
 
   tags = {
-    Name = "${var.project_name}-public-${count.index + 1}"
+    Name = "${var.project_name}-public${count.index + 1}-${var.availability_zones[count.index]}"
   }
 }
 
@@ -40,7 +42,7 @@ resource "aws_subnet" "private" {
   map_public_ip_on_launch = false
 
   tags = {
-    Name = "${var.project_name}-private-${count.index + 1}"
+    Name = "${var.project_name}-private${count.index + 1}-${var.availability_zones[count.index % length(var.availability_zones)]}"
   }
 }
 
