@@ -1,45 +1,28 @@
-# Global
-variable "aws_region" {
-  description = "Region định danh cho tài nguyên"
-  type        = string
-}
-
-variable "availability_zones" {
-  description = "AZ to deploy resources"
-  type        = list(string)
-}
-
 variable "project_name" {
   description = "Tên dự án để gán tag"
   type        = string
 }
 
-# VPC
-variable "vpc_cidr" {
-  description = "Dải IP của VPC"
+variable "vpc_id" {
+  description = "ID của VPC dùng để tạo security group"
   type        = string
 }
 
-variable "public_subnet_cidrs" {
-  type = list(string)
+variable "private_subnet_ids" {
+  description = "Danh sách private subnet IDs cho ASG"
+  type        = list(string)
 }
 
-variable "private_subnet_cidrs" {
-  type = list(string)
-}
-
-# Launch Template
 variable "ami_id" {
-  description = "ID của AMI để sử dụng trong Launch Template"
+  description = "AMI ID cho EC2 instances trong ASG"
   type        = string
 }
 
 variable "instance_type" {
-  description = "Loại instance để sử dụng trong Launch Template"
+  description = "Loại EC2 instance"
   type        = string
 }
 
-# EBS
 variable "ebs_device_name" {
   description = "Tên thiết bị EBS gắn vào instance (vd: /dev/xvda)"
   type        = string
@@ -56,7 +39,7 @@ variable "ebs_volume_type" {
 }
 
 variable "ebs_delete_on_termination" {
-  description = "Xoá EBS khi terminate instance"
+  description = "Xóa EBS khi terminate instance"
   type        = bool
 }
 
@@ -65,7 +48,6 @@ variable "ebs_encrypted" {
   type        = bool
 }
 
-# Auto Scaling Group
 variable "min_size" {
   description = "Số lượng instance tối thiểu"
   type        = number
@@ -79,6 +61,7 @@ variable "max_size" {
 variable "desired_capacity" {
   description = "Số lượng instance mong muốn"
   type        = number
+  default     = 1
 }
 
 variable "health_check_type" {

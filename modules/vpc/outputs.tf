@@ -17,6 +17,16 @@ output "private_subnet_ids" {
   value       = aws_subnet.private[*].id
 }
 
+output "app_subnet_ids" {
+  description = "Danh sách ID của các subnet private dùng cho ứng dụng (số lượng bằng số AZ)"
+  value       = slice(aws_subnet.private[*].id, 0, length(var.availability_zones))
+}
+
+output "rds_subnet_ids" {
+  description = "Danh sách ID của các subnet private dùng cho RDS (số lượng bằng số AZ)"
+  value       = slice(aws_subnet.private[*].id, length(var.availability_zones), length(var.private_subnet_cidrs))
+}
+
 output "igw_id" {
   description = "ID của Internet Gateway"
   value       = aws_internet_gateway.main.id
