@@ -9,6 +9,12 @@ module "vpc" {
   private_subnet_cidrs = var.private_subnet_cidrs
 }
 
+module "iam" {
+  source = "./modules/iam"
+
+  project_name = var.project_name
+}
+
 module "asg" {
   source = "./modules/asg"
 
@@ -30,6 +36,6 @@ module "asg" {
   target_group_arns         = var.target_group_arns
   app_port                  = var.app_port
   app_cidr_blocks           = var.app_cidr_blocks
-  iam_instance_profile_name = var.iam_instance_profile_name
+  iam_instance_profile_name = module.iam.app_server_iam_instance_profile_name
   tags                      = var.tags
 }

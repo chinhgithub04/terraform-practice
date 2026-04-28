@@ -106,11 +106,6 @@ variable "app_cidr_blocks" {
   type        = list(string)
 }
 
-variable "iam_instance_profile_name" {
-  description = "Tên IAM instance profile gắn vào EC2 (optional)"
-  type        = string
-}
-
 variable "tags" {
   description = "Các tags bổ sung cho tài nguyên"
   type        = map(string)
