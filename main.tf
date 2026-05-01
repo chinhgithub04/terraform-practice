@@ -18,13 +18,15 @@ module "iam" {
 module "alb" {
   source = "./modules/alb"
 
-  project_name      = var.project_name
-  vpc_id            = module.vpc.vpc_id
-  public_subnet_ids = module.vpc.public_subnet_ids
-  alb_port          = var.alb_port
-  alb_cidr_blocks   = var.alb_cidr_blocks
-  target_group_port = var.target_group_port
-  tags              = var.tags
+  project_name          = var.project_name
+  vpc_id                = module.vpc.vpc_id
+  public_subnet_ids     = module.vpc.public_subnet_ids
+  alb_port              = var.alb_port
+  alb_protocol          = var.alb_protocol
+  alb_cidr_blocks       = var.alb_cidr_blocks
+  target_group_port     = var.target_group_port
+  target_group_protocol = var.target_group_protocol
+  tags                  = var.tags
 }
 
 module "asg" {

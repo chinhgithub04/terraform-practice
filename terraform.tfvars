@@ -21,13 +21,15 @@ max_size                  = 3
 desired_capacity          = 2
 health_check_type         = "ELB"
 health_check_grace_period = 300
-app_port                  = 80
+app_port                  = 8080
 app_cidr_blocks           = ["0.0.0.0/0"]
 
 # ALB
-alb_port          = 80
-alb_cidr_blocks   = ["0.0.0.0/0"]
-target_group_port = 80
+alb_port              = 80
+alb_protocol          = "HTTP"
+alb_cidr_blocks       = ["0.0.0.0/0"]
+target_group_port     = 8080
+target_group_protocol = "HTTP"
 
 tags = {
   Environment = "dev"

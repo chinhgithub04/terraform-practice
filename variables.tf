@@ -112,6 +112,11 @@ variable "alb_port" {
   type        = number
 }
 
+variable "alb_protocol" {
+  description = "Giao thức sử dụng cho ALB (HTTP hoặc HTTPS)"
+  type        = string
+}
+
 variable "alb_cidr_blocks" {
   description = "Danh sách CIDR được phép truy cập ALB"
   type        = list(string)
@@ -120,4 +125,9 @@ variable "alb_cidr_blocks" {
 variable "target_group_port" {
   description = "Port mà target group sẽ lắng nghe"
   type        = number
+}
+
+variable "target_group_protocol" {
+  description = "Giao thức sử dụng cho target group (HTTP hoặc HTTPS)"
+  type        = string
 }

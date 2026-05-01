@@ -73,7 +73,7 @@ resource "aws_lb" "this" {
 resource "aws_lb_listener" "http" {
   load_balancer_arn = aws_lb.this.arn
   port              = var.alb_port
-  protocol          = "HTTP"
+  protocol            = var.alb_protocol
 
   default_action {
     type             = "forward"

@@ -77,6 +77,10 @@ variable "alb_port" {
   type        = number
 }
 
+variable "alb_protocol" {
+  description = "Giao thức sử dụng cho ALB listener (HTTP hoặc HTTPS)"
+  type        = string
+}
 variable "public_subnet_ids" {
   description = "Danh sách ID các public subnet để đặt ALB"
   type        = list(string)
