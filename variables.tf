@@ -91,11 +91,6 @@ variable "health_check_grace_period" {
   type        = number
 }
 
-variable "target_group_arns" {
-  description = "Danh sách ARN của target groups để attach vào ASG"
-  type        = list(string)
-}
-
 variable "app_port" {
   description = "Port ứng dụng cho phép inbound"
   type        = number
@@ -109,4 +104,20 @@ variable "app_cidr_blocks" {
 variable "tags" {
   description = "Các tags bổ sung cho tài nguyên"
   type        = map(string)
+}
+
+# ALB
+variable "alb_port" {
+  description = "Port mà ALB sẽ lắng nghe"
+  type        = number
+}
+
+variable "alb_cidr_blocks" {
+  description = "Danh sách CIDR được phép truy cập ALB"
+  type        = list(string)
+}
+
+variable "target_group_port" {
+  description = "Port mà target group sẽ lắng nghe"
+  type        = number
 }

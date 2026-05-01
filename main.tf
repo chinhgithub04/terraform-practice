@@ -15,6 +15,18 @@ module "iam" {
   project_name = var.project_name
 }
 
+module "alb" {
+  source = "./modules/alb"
+
+  project_name          = var.project_name
+  vpc_id                = module.vpc.vpc_id
+  public_subnet_ids     = module.vpc.public_subnet_ids
+  alb_port              = var.alb_port
+  alb_cidr_blocks       = var.alb_cidr_blocks
+  target_group_port     = var.target_group_port
+  tags                  = var.tags
+}
+
 module "asg" {
   source = "./modules/asg"
 
@@ -33,7 +45,7 @@ module "asg" {
   desired_capacity          = var.desired_capacity
   health_check_type         = var.health_check_type
   health_check_grace_period = var.health_check_grace_period
-  target_group_arns         = var.target_group_arns
+  target_group_arns         = [module.alb.alb_target_group_arn]
   app_port                  = var.app_port
   app_cidr_blocks           = var.app_cidr_blocks
   iam_instance_profile_name = module.iam.app_server_iam_instance_profile_name
