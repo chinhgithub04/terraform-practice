@@ -6,6 +6,11 @@ output "alb_dns_name" {
   description = "DNS name của ALB để truy cập ứng dụng"
   value       = module.alb.alb_dns_name
 }
+
+output "rds_db_endpoint" {
+  description = "Connection endpoint của RDS database (đã bao gồm port)"
+  value       = module.rds.rds_db_endpoint
+}
 output "vpc_cidr" {
   description = "CIDR block của VPC"
   value       = module.vpc.vpc_cidr

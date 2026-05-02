@@ -131,3 +131,44 @@ variable "target_group_protocol" {
   description = "Giao thức sử dụng cho target group (HTTP hoặc HTTPS)"
   type        = string
 }
+
+# RDS
+variable "db_storage_type" {
+  description = "Loại storage cho RDS (vd: gp3, gp2)"
+  type        = string
+}
+
+variable "db_allocated_storage" {
+  description = "Dung lượng storage cấp phát cho RDS (GB)"
+  type        = number
+}
+
+variable "db_engine" {
+  description = "Engine của database (vd: mysql, postgres)"
+  type        = string
+}
+
+variable "db_engine_version" {
+  description = "Phiên bản của database engine"
+  type        = string
+}
+
+variable "db_instance_class" {
+  description = "Instance class cho database (vd: db.t3.micro)"
+  type        = string
+}
+
+variable "db_name" {
+  description = "Tên database khởi tạo"
+  type        = string
+}
+
+variable "db_username" {
+  description = "Tên master user"
+  type        = string
+}
+
+variable "db_port" {
+  description = "Port kết nối tới database"
+  type        = number
+}

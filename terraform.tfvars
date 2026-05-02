@@ -31,6 +31,16 @@ alb_cidr_blocks       = ["0.0.0.0/0"]
 target_group_port     = 8080
 target_group_protocol = "HTTP"
 
+# RDS
+db_storage_type      = "gp3"
+db_allocated_storage = 20
+db_engine            = "mysql"
+db_engine_version    = "8.0.45"
+db_instance_class    = "db.t3.micro"
+db_name              = "merxly"
+db_username          = "admin"
+db_port              = 3306
+
 tags = {
   Environment = "dev"
   Owner       = "xbrain"
