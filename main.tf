@@ -71,3 +71,13 @@ module "rds" {
   db_port               = var.db_port
   tags                  = var.tags
 }
+
+module "ecr" {
+  source = "./modules/ecr"
+
+  project_name         = var.project_name
+  ecr_repository_name  = var.ecr_repository_name
+  image_tag_mutability = var.ecr_image_tag_mutability
+  scan_on_push         = var.ecr_scan_on_push
+  tags                 = var.tags
+}

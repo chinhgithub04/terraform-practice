@@ -11,6 +11,11 @@ output "rds_db_endpoint" {
   description = "Connection endpoint của RDS database (đã bao gồm port)"
   value       = module.rds.rds_db_endpoint
 }
+
+output "ecr_repository_url" {
+  description = "URL của ECR repository để push/pull images"
+  value       = module.ecr.ecr_repository_url
+}
 output "vpc_cidr" {
   description = "CIDR block của VPC"
   value       = module.vpc.vpc_cidr

@@ -41,6 +41,11 @@ db_name              = "merxly"
 db_username          = "admin"
 db_port              = 3306
 
+# ECR
+ecr_repository_name      = "xbrain-app-repo"
+ecr_image_tag_mutability = "IMMUTABLE"
+ecr_scan_on_push         = true
+
 tags = {
   Environment = "dev"
   Owner       = "xbrain"

@@ -172,3 +172,19 @@ variable "db_port" {
   description = "Port kết nối tới database"
   type        = number
 }
+
+# ECR
+variable "ecr_repository_name" {
+  description = "Tên của ECR repository"
+  type        = string
+}
+
+variable "ecr_image_tag_mutability" {
+  description = "Chế độ tag mutability cho image (MUTABLE hoặc IMMUTABLE)"
+  type        = string
+}
+
+variable "ecr_scan_on_push" {
+  description = "Bật tính năng scan image khi push lên ECR"
+  type        = bool
+}
