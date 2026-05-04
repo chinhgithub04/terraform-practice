@@ -20,7 +20,7 @@ resource "aws_ecr_repository" "this" {
 resource "aws_ecr_lifecycle_policy" "this" {
   repository = aws_ecr_repository.this.name
 
-  policy = jsondecode({
+  policy = jsonencode({
     rules = [
       {
         rulePriority = 1 # Độ ưu tiên (1 là cao nhất)
