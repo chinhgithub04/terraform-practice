@@ -29,7 +29,6 @@ resource "aws_ecr_lifecycle_policy" "this" {
           tagStatus     = "any" # Áp dụng cho tất cả các image (có tag hoặc không tag)
           countType     = "imageCountMoreThan" # Điều kiện kích hoạt: dựa trên số lượng
           countNumber   = 10 # Số lượng image tối đa được giữ lại
-          countUnit     = "imageCount" # Đếm số lượng image
         }
         action       = {
           type = "expire" # Hành động: xóa bỏ
