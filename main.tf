@@ -81,3 +81,12 @@ module "ecr" {
   scan_on_push         = var.ecr_scan_on_push
   tags                 = var.tags
 }
+
+module "ecs" {
+  source = "./modules/ecs"
+
+  project_name     = var.project_name
+  ecs_cluster_name = var.ecs_cluster_name
+  asg_arn          = module.asg.asg_arn
+  tags             = var.tags
+}

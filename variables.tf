@@ -188,3 +188,9 @@ variable "ecr_scan_on_push" {
   description = "Bật tính năng scan image khi push lên ECR"
   type        = bool
 }
+
+# ECS
+variable "ecs_cluster_name" {
+  description = "Tên của ECS cluster"
+  type        = string
+}

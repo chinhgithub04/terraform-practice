@@ -46,6 +46,9 @@ ecr_repository_name      = "xbrain-app-repo"
 ecr_image_tag_mutability = "IMMUTABLE"
 ecr_scan_on_push         = true
 
+# ECS
+ecs_cluster_name = "xbrain-ecs-cluster"
+
 tags = {
   Environment = "dev"
   Owner       = "xbrain"

@@ -16,6 +16,11 @@ output "ecr_repository_url" {
   description = "URL của ECR repository để push/pull images"
   value       = module.ecr.ecr_repository_url
 }
+
+output "ecs_cluster_name" {
+  description = "Tên của ECS cluster"
+  value       = module.ecs.ecs_cluster_name
+}
 output "vpc_cidr" {
   description = "CIDR block của VPC"
   value       = module.vpc.vpc_cidr
