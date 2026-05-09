@@ -48,3 +48,47 @@ resource "aws_ecs_cluster_capacity_providers" "this" {
     capacity_provider = aws_ecs_capacity_provider.this.name
   }
 }
+
+resource "aws_cloudwatch_log_group" "ecs_task_logs" {
+  name              = "/ecs/${var.task_family}"
+  retention_in_days = 7
+
+  tags = local.merged_tags
+}
+
+resource "aws_ecs_task_definition" "this" {
+  family                   = var.task_family
+  network_mode             = var.task_network_mode
+  requires_compatibilities = ["EC2"]
+  cpu                      = var.task_cpu
+  memory                   = var.task_memory
+  execution_role_arn       = var.task_execution_role_arn
+  task_role_arn            = var.task_role_arn
+
+  container_definitions = jsonencode([
+    {
+      name      = var.container_name
+      image     = var.container_image
+      cpu       = var.task_cpu
+      memory    = var.task_memory
+      essential = true
+      portMappings = [
+        {
+          containerPort = var.container_port
+          hostPort      = var.container_port
+          protocol      = "tcp"
+        }
+      ]
+      logConfiguration = {
+        logDriver = "awslogs"
+        options = {
+          "awslogs-group"         = aws_cloudwatch_log_group.ecs_task_logs.name
+          "awslogs-region"        = "us-east-1"
+          "awslogs-stream-prefix" = "ecs"
+        }
+      }
+    }
+  ])
+
+  tags = local.merged_tags
+}

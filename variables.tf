@@ -194,3 +194,23 @@ variable "ecs_cluster_name" {
   description = "Tên của ECS cluster"
   type        = string
 }
+
+variable "ecs_task_family" {
+  description = "Tên family của ECS task definition"
+  type        = string
+}
+
+variable "ecs_container_name" {
+  description = "Tên của container trong task"
+  type        = string
+}
+
+variable "ecs_container_image" {
+  description = "Đường dẫn image pull từ ECR/Docker Hub để chạy container"
+  type        = string
+}
+
+variable "ecs_container_port" {
+  description = "Port mà container lắng nghe"
+  type        = number
+}

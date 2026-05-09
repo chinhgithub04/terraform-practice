@@ -36,3 +36,52 @@ variable "tags" {
   type        = map(string)
   default     = {}
 }
+
+# Task Definition variables
+variable "task_family" {
+  description = "Tên family của ECS task definition"
+  type        = string
+}
+
+variable "task_network_mode" {
+  description = "Network mode cho ECS task (awsvpc, bridge, host)"
+  type        = string
+  default     = "awsvpc"
+}
+
+variable "task_cpu" {
+  description = "Đơn vị CPU dùng cho task"
+  type        = number
+  default     = 256
+}
+
+variable "task_memory" {
+  description = "Dung lượng bộ nhớ (MiB) dùng cho task"
+  type        = number
+  default     = 512
+}
+
+variable "container_name" {
+  description = "Tên của container trong task"
+  type        = string
+}
+
+variable "container_image" {
+  description = "Đường dẫn image pull từ ECR/Docker Hub để chạy container"
+  type        = string
+}
+
+variable "container_port" {
+  description = "Port mà container lắng nghe"
+  type        = number
+}
+
+variable "task_execution_role_arn" {
+  description = "ARN của role cho phép ECS agent tải image và in logs"
+  type        = string
+}
+
+variable "task_role_arn" {
+  description = "ARN của role cho phép task gọi các AWS services khác (S3, SQS, KMS, v.v...)"
+  type        = string
+}

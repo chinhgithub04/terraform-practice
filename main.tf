@@ -85,8 +85,14 @@ module "ecr" {
 module "ecs" {
   source = "./modules/ecs"
 
-  project_name     = var.project_name
-  ecs_cluster_name = var.ecs_cluster_name
-  asg_arn          = module.asg.asg_arn
-  tags             = var.tags
+  project_name            = var.project_name
+  ecs_cluster_name        = var.ecs_cluster_name
+  asg_arn                 = module.asg.asg_arn
+  task_family             = var.ecs_task_family
+  container_name          = var.ecs_container_name
+  container_image         = module.ecr.ecr_repository_uri
+  container_port          = var.ecs_container_port
+  task_execution_role_arn = module.iam.ecs_task_execution_role_arn
+  task_role_arn           = module.iam.ecs_task_role_arn
+  tags                    = var.tags
 }

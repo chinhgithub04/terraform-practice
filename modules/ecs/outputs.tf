@@ -17,3 +17,13 @@ output "ecs_capacity_provider_name" {
   description = "Tên của ECS capacity provider"
   value       = aws_ecs_capacity_provider.this.name
 }
+
+output "ecs_task_definition_arn" {
+  description = "ARN của ECS task definition vừa tạo"
+  value       = aws_ecs_task_definition.this.arn
+}
+
+output "ecs_task_definition_family" {
+  description = "Family name của ECS task definition"
+  value       = aws_ecs_task_definition.this.family
+}
