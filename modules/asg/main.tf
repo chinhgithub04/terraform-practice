@@ -86,6 +86,7 @@ resource "aws_autoscaling_group" "this" {
   health_check_type         = var.health_check_type
   health_check_grace_period = var.health_check_grace_period
   target_group_arns         = var.target_group_arns
+  protect_from_scale_in     = true
 
   launch_template {
     id      = aws_launch_template.this.id

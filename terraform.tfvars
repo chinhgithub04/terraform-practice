@@ -47,11 +47,14 @@ ecr_image_tag_mutability = "IMMUTABLE"
 ecr_scan_on_push         = true
 
 # ECS
-ecs_cluster_name    = "xbrain-ecs-cluster"
-ecs_task_family     = "xbrain-app-task"
-ecs_container_name  = "xbrain-app-container"
-ecs_container_image = "nginx:latest" # Change to proper container image when production
-ecs_container_port  = 8080
+ecs_cluster_name            = "xbrain-ecs-cluster"
+ecs_task_family             = "xbrain-app-task"
+ecs_container_name          = "xbrain-app-container"
+ecs_container_image         = "nginx:latest" # Change to proper container image when production
+ecs_container_port          = 8080
+ecs_task_cpu                = 512
+ecs_task_memory             = 1024
+ecs_task_memory_reservation = 1024
 
 tags = {
   Environment = "dev"

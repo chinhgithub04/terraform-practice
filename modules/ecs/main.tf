@@ -10,10 +10,10 @@ resource "aws_ecs_cluster" "this" {
   name = var.ecs_cluster_name
 
   setting {
-    name = "containerInsights" # Gửi metrics và logs của ECS cluster đến CloudWatch
+    name  = "containerInsights" # Gửi metrics và logs của ECS cluster đến CloudWatch
     value = "enabled"
   }
-  
+
   tags = local.merged_tags
 }
 
@@ -25,10 +25,10 @@ resource "aws_ecs_capacity_provider" "this" {
     managed_termination_protection = var.managed_termination_protection
 
     managed_scaling {
-      minimum_scaling_step_size = 1 # Mỗi lần tăng/giảm tối thiểu bao nhiêu máy chủ
+      minimum_scaling_step_size = 1  # Mỗi lần tăng/giảm tối thiểu bao nhiêu máy chủ
       maximum_scaling_step_size = 10 # Mỗi lần tăng/giảm tối đa bao nhiêu máy chủ
-      status          = var.managed_scaling_status
-      target_capacity = var.target_capacity
+      status                    = var.managed_scaling_status
+      target_capacity           = var.target_capacity
     }
   }
 
@@ -57,9 +57,13 @@ resource "aws_cloudwatch_log_group" "ecs_task_logs" {
 }
 
 resource "aws_ecs_task_definition" "this" {
-  family                   = var.task_family
+  family = var.task_family
+  runtime_platform {
+    operating_system_family = "LINUX"
+    cpu_architecture        = "X86_64"
+  }
   network_mode             = var.task_network_mode
-  requires_compatibilities = ["EC2"]
+  requires_compatibilities = ["EC2"] # Launch type
   cpu                      = var.task_cpu
   memory                   = var.task_memory
   execution_role_arn       = var.task_execution_role_arn
@@ -67,11 +71,12 @@ resource "aws_ecs_task_definition" "this" {
 
   container_definitions = jsonencode([
     {
-      name      = var.container_name
-      image     = var.container_image
-      cpu       = var.task_cpu
-      memory    = var.task_memory
-      essential = true
+      name              = var.container_name
+      image             = var.container_image
+      cpu               = var.task_cpu
+      memory            = var.task_memory
+      memoryReservation = var.task_memory_reservation
+      essential         = true # Nếu container này sập thì toàn bộ Task sẽ được khởi động lại
       portMappings = [
         {
           containerPort = var.container_port

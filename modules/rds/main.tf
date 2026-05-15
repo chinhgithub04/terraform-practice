@@ -66,7 +66,7 @@ resource "aws_db_instance" "this" {
 }
 
 resource "aws_secretsmanager_secret" "db_secret" {
-  name        = "${var.project_name}-db-secret"
+  name_prefix = "${var.project_name}-db-secret-"
   description = "Secret chứa thông tin kết nối RDS database"
   tags = local.merged_tags
 }

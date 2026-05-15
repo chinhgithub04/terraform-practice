@@ -56,7 +56,13 @@ variable "task_cpu" {
 }
 
 variable "task_memory" {
-  description = "Dung lượng bộ nhớ (MiB) dùng cho task"
+  description = "Hard limit của memory"
+  type        = number
+  default     = 1024
+}
+
+variable "task_memory_reservation" {
+  description = "Soft limit của memory"
   type        = number
   default     = 512
 }

@@ -214,3 +214,19 @@ variable "ecs_container_port" {
   description = "Port mà container lắng nghe"
   type        = number
 }
+
+variable "ecs_task_cpu" {
+  description = "Đơn vị CPU dùng cho task"
+  type        = number
+}
+
+variable "ecs_task_memory" {
+  description = "Dung lượng bộ nhớ (MiB) dùng cho task"
+  type        = number
+}
+
+variable "ecs_task_memory_reservation" {
+  description = "Dung lượng bộ nhớ (MiB) dùng cho task"
+  type        = number
+}
+

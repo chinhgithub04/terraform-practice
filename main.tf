@@ -54,23 +54,23 @@ module "asg" {
   tags                      = var.tags
 }
 
-module "rds" {
-  source = "./modules/rds"
+# module "rds" {
+#   source = "./modules/rds"
 
-  project_name          = var.project_name
-  vpc_id                = module.vpc.vpc_id
-  rds_subnet_ids        = module.vpc.rds_subnet_ids
-  app_security_group_id = module.asg.instance_security_group_id
-  db_allocated_storage  = var.db_allocated_storage
-  db_storage_type       = var.db_storage_type
-  db_engine             = var.db_engine
-  db_engine_version     = var.db_engine_version
-  db_instance_class     = var.db_instance_class
-  db_name               = var.db_name
-  db_username           = var.db_username
-  db_port               = var.db_port
-  tags                  = var.tags
-}
+#   project_name          = var.project_name
+#   vpc_id                = module.vpc.vpc_id
+#   rds_subnet_ids        = module.vpc.rds_subnet_ids
+#   app_security_group_id = module.asg.instance_security_group_id
+#   db_allocated_storage  = var.db_allocated_storage
+#   db_storage_type       = var.db_storage_type
+#   db_engine             = var.db_engine
+#   db_engine_version     = var.db_engine_version
+#   db_instance_class     = var.db_instance_class
+#   db_name               = var.db_name
+#   db_username           = var.db_username
+#   db_port               = var.db_port
+#   tags                  = var.tags
+# }
 
 module "ecr" {
   source = "./modules/ecr"
@@ -90,9 +90,12 @@ module "ecs" {
   asg_arn                 = module.asg.asg_arn
   task_family             = var.ecs_task_family
   container_name          = var.ecs_container_name
-  container_image         = module.ecr.ecr_repository_uri
+  container_image         = module.ecr.ecr_repository_url
   container_port          = var.ecs_container_port
   task_execution_role_arn = module.iam.ecs_task_execution_role_arn
   task_role_arn           = module.iam.ecs_task_role_arn
+  task_cpu                = var.ecs_task_cpu
+  task_memory             = var.ecs_task_memory
+  task_memory_reservation = var.ecs_task_memory_reservation
   tags                    = var.tags
 }

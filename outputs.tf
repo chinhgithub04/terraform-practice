@@ -7,10 +7,10 @@ output "alb_dns_name" {
   value       = module.alb.alb_dns_name
 }
 
-output "rds_db_endpoint" {
-  description = "Connection endpoint của RDS database (đã bao gồm port)"
-  value       = module.rds.rds_db_endpoint
-}
+# output "rds_db_endpoint" {
+#   description = "Connection endpoint của RDS database (đã bao gồm port)"
+#   value       = module.rds.rds_db_endpoint
+# }
 
 output "ecr_repository_url" {
   description = "URL của ECR repository để push/pull images"
