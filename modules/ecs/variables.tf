@@ -91,3 +91,30 @@ variable "task_role_arn" {
   description = "ARN của role cho phép task gọi các AWS services khác (S3, SQS, KMS, v.v...)"
   type        = string
 }
+
+# ECS Service variables
+variable "ecs_service_name" {
+  description = "Tên của ECS service"
+  type        = string
+}
+
+variable "ecs_service_desired_count" {
+  description = "Số lượng tasks mong muốn chạy cho service"
+  type        = number
+  default     = 1
+}
+
+variable "target_group_arn" {
+  description = "ARN của target group để ALB forward đến service"
+  type        = string
+}
+
+variable "ecs_service_subnets" {
+  description = "Danh sách ID các private subnet để chạy ECS tasks"
+  type        = list(string)
+}
+
+variable "ecs_service_security_groups" {
+  description = "Danh sách ID các security group áp dụng cho ECS tasks"
+  type        = list(string)
+}

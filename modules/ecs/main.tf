@@ -97,3 +97,33 @@ resource "aws_ecs_task_definition" "this" {
 
   tags = local.merged_tags
 }
+
+resource "aws_ecs_service" "this" {
+  name            = var.ecs_service_name
+  cluster         = aws_ecs_cluster.this.id
+  task_definition = aws_ecs_task_definition.this.arn
+  desired_count   = var.ecs_service_desired_count
+
+  capacity_provider_strategy {
+    capacity_provider = aws_ecs_capacity_provider.this.name
+    weight            = 100
+    base              = 1
+  }
+
+  network_configuration {
+    subnets         = var.ecs_service_subnets
+    security_groups = var.ecs_service_security_groups
+  }
+
+  load_balancer {
+    target_group_arn = var.target_group_arn
+    container_name   = var.container_name
+    container_port   = var.container_port
+  }
+
+  lifecycle {
+    ignore_changes = [desired_count]
+  }
+
+  tags = local.merged_tags
+}

@@ -27,3 +27,13 @@ output "ecs_task_definition_family" {
   description = "Family name của ECS task definition"
   value       = aws_ecs_task_definition.this.family
 }
+
+output "ecs_service_name" {
+  description = "Tên của ECS service"
+  value       = aws_ecs_service.this.name
+}
+
+output "ecs_service_id" {
+  description = "ID của ECS service"
+  value       = aws_ecs_service.this.id
+}

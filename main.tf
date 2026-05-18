@@ -94,8 +94,13 @@ module "ecs" {
   container_port          = var.ecs_container_port
   task_execution_role_arn = module.iam.ecs_task_execution_role_arn
   task_role_arn           = module.iam.ecs_task_role_arn
-  task_cpu                = var.ecs_task_cpu
-  task_memory             = var.ecs_task_memory
-  task_memory_reservation = var.ecs_task_memory_reservation
-  tags                    = var.tags
+  task_cpu                    = var.ecs_task_cpu
+  task_memory                 = var.ecs_task_memory
+  task_memory_reservation     = var.ecs_task_memory_reservation
+  ecs_service_name            = var.ecs_service_name
+  ecs_service_desired_count   = var.ecs_service_desired_count
+  target_group_arn            = module.alb.alb_target_group_arn
+  ecs_service_subnets         = module.vpc.app_subnet_ids
+  ecs_service_security_groups = [module.asg.instance_security_group_id]
+  tags                        = var.tags
 }

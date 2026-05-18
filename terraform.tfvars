@@ -55,6 +55,8 @@ ecs_container_port          = 8080
 ecs_task_cpu                = 512
 ecs_task_memory             = 1024
 ecs_task_memory_reservation = 1024
+ecs_service_name            = "xbrain-app-service"
+ecs_service_desired_count   = 2
 
 tags = {
   Environment = "dev"

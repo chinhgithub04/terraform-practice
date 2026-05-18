@@ -215,6 +215,16 @@ variable "ecs_container_port" {
   type        = number
 }
 
+variable "ecs_service_name" {
+  description = "Tên của ECS service"
+  type        = string
+}
+
+variable "ecs_service_desired_count" {
+  description = "Số lượng tasks mong muốn chạy cho service"
+  type        = number
+}
+
 variable "ecs_task_cpu" {
   description = "Đơn vị CPU dùng cho task"
   type        = number
