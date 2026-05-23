@@ -36,10 +36,11 @@ resource "aws_security_group" "alb" {
 }
 
 resource "aws_lb_target_group" "app" {
-  name     = "${var.project_name}-tg"
-  port     = var.target_group_port
-  protocol = var.target_group_protocol
-  vpc_id   = var.vpc_id
+  name        = "${var.project_name}-tg"
+  port        = var.target_group_port
+  protocol    = var.target_group_protocol
+  vpc_id      = var.vpc_id
+  target_type = "ip"
 
   health_check {
     enabled             = var.health_check_enabled

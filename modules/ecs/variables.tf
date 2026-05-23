@@ -82,16 +82,6 @@ variable "container_port" {
   type        = number
 }
 
-variable "task_execution_role_arn" {
-  description = "ARN của role cho phép ECS agent tải image và in logs"
-  type        = string
-}
-
-variable "task_role_arn" {
-  description = "ARN của role cho phép task gọi các AWS services khác (S3, SQS, KMS, v.v...)"
-  type        = string
-}
-
 # ECS Service variables
 variable "ecs_service_name" {
   description = "Tên của ECS service"

@@ -8,6 +8,11 @@ variable "vpc_id" {
   type        = string
 }
 
+variable "ecs_cluster_name" {
+  description = "Tên của ECS Cluster để EC2 đăng ký vào"
+  type        = string
+}
+
 variable "private_subnet_ids" {
   description = "Danh sách private subnet IDs cho ASG"
   type        = list(string)
@@ -72,11 +77,6 @@ variable "health_check_type" {
 variable "health_check_grace_period" {
   description = "Thời gian chờ trước khi áp dụng health check"
   type        = number
-}
-
-variable "target_group_arns" {
-  description = "Danh sách ARN của target groups để attach vào ASG"
-  type        = list(string)
 }
 
 variable "app_port" {

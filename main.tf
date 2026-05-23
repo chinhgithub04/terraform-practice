@@ -34,6 +34,7 @@ module "asg" {
 
   project_name              = var.project_name
   vpc_id                    = module.vpc.vpc_id
+  ecs_cluster_name          = var.ecs_cluster_name
   private_subnet_ids        = module.vpc.app_subnet_ids
   ami_id                    = var.ami_id
   instance_type             = var.instance_type
@@ -47,7 +48,6 @@ module "asg" {
   desired_capacity          = var.desired_capacity
   health_check_type         = var.health_check_type
   health_check_grace_period = var.health_check_grace_period
-  target_group_arns         = [module.alb.alb_target_group_arn]
   app_port                  = var.app_port
   app_cidr_blocks           = var.app_cidr_blocks
   iam_instance_profile_name = module.iam.app_server_iam_instance_profile_name
@@ -92,8 +92,6 @@ module "ecs" {
   container_name          = var.ecs_container_name
   container_image         = module.ecr.ecr_repository_url
   container_port          = var.ecs_container_port
-  task_execution_role_arn = module.iam.ecs_task_execution_role_arn
-  task_role_arn           = module.iam.ecs_task_role_arn
   task_cpu                    = var.ecs_task_cpu
   task_memory                 = var.ecs_task_memory
   task_memory_reservation     = var.ecs_task_memory_reservation

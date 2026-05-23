@@ -41,7 +41,7 @@ resource "aws_launch_template" "this" {
   image_id      = var.ami_id
   instance_type = var.instance_type
   user_data = base64encode(templatefile("${path.module}/scripts/install_web.sh", {
-    project_name = var.project_name
+    ecs_cluster_name = var.ecs_cluster_name
   }))
   vpc_security_group_ids = [aws_security_group.asg.id]
 
@@ -85,7 +85,6 @@ resource "aws_autoscaling_group" "this" {
   vpc_zone_identifier       = var.private_subnet_ids
   health_check_type         = var.health_check_type
   health_check_grace_period = var.health_check_grace_period
-  target_group_arns         = var.target_group_arns
   protect_from_scale_in     = true
 
   launch_template {
