@@ -40,9 +40,11 @@ jobs:
           fi
 
       - name: Terraform Init
-        run: terraform init
-        working-directory: ${{ steps.environment.outputs.env_path }}
+        run: |
+          cd ${{ steps.environment.outputs.env_path }}
+          terraform init
 
       - name: Terraform Destroy
-        run: terraform destroy -auto-approve
-        working-directory: ${{ steps.environment.outputs.env_path }}
+        run: |
+          cd ${{ steps.environment.outputs.env_path }}
+          terraform destroy -auto-approve

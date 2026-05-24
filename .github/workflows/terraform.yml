@@ -34,7 +34,7 @@ jobs:
             echo "env_path=environments/prod" >> $GITHUB_OUTPUT
             echo "env_name=prod" >> $GITHUB_OUTPUT
           else
-            echo "env_path=." >> $GITHUB_OUTPUT
+            echo "env_path=environments/dev" >> $GITHUB_OUTPUT
             echo "env_name=main" >> $GITHUB_OUTPUT
           fi
         # 3. Configure AWS Credentials using the role ARN stored in GitHub Secrets
@@ -48,22 +48,27 @@ jobs:
         uses: hashicorp/setup-terraform@v3
         # 5. Initialize Terraform
       - name: Terraform Init
-        run: terraform init
-        working-directory: ${{ steps.environment.outputs.env_path }}
+        run: |
+          cd ${{ steps.environment.outputs.env_path }}
+          terraform init
         # 6. Format Terraform files
       - name: Terraform Format
-        run: terraform fmt -check # -check có nghĩa là chỉ kiểm tra định dạng mà không sửa lỗi, nếu có lỗi sẽ làm cho bước này thất bại
-        working-directory: ${{ steps.environment.outputs.env_path }}
+        run: |
+          cd ${{ steps.environment.outputs.env_path }}
+          terraform fmt -check # -check có nghĩa là chỉ kiểm tra định dạng mà không sửa lỗi, nếu có lỗi sẽ làm cho bước này thất bại
         # 7. Validate Terraform configuration
       - name: Terraform Validate
-        run: terraform validate
-        working-directory: ${{ steps.environment.outputs.env_path }}
+        run: |
+          cd ${{ steps.environment.outputs.env_path }}
+          terraform validate
         # 8. Plan Terraform changes
       - name: Terraform Plan
-        run: terraform plan -input=false -out=tfplan # -out=tfplan sẽ lưu kế hoạch vào file tfplan để sử dụng ở bước apply sau này
-        working-directory: ${{ steps.environment.outputs.env_path }}
+        run: |
+          cd ${{ steps.environment.outputs.env_path }}
+          terraform plan -input=false -out=tfplan # -out=tfplan sẽ lưu kế hoạch vào file tfplan để sử dụng ở bước apply sau này
         # 9. Apply Terraform changes (chỉ khi push vào dev hoặc production)
       - name: Terraform Apply
         if: (github.ref == 'refs/heads/dev' || github.ref == 'refs/heads/production') && github.event_name == 'push'
-        run: terraform apply -input=false tfplan # -tfplan sẽ áp dụng kế hoạch đã được lưu ở bước plan trước đó
-        working-directory: ${{ steps.environment.outputs.env_path }}
+        run: |
+          cd ${{ steps.environment.outputs.env_path }}
+          terraform apply -input=false tfplan # -tfplan sẽ áp dụng kế hoạch đã được lưu ở bước plan trước đó
