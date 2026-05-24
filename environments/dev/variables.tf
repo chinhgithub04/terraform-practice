@@ -5,7 +5,7 @@ variable "aws_region" {
 }
 
 variable "availability_zones" {
-  description = "AZ to deploy resources"
+  description = "Danh sách các Availability Zone để triển khai tài nguyên"
   type        = list(string)
 }
 
@@ -21,19 +21,21 @@ variable "vpc_cidr" {
 }
 
 variable "public_subnets" {
-  description = "Map of public subnets configuration"
+  description = "Bản đồ cấu hình các subnet public (chia rõ loại cho ALB hoặc NAT Gateway)"
   type = map(object({
     cidr_block        = string
     availability_zone = string
+    type              = string # "alb" hoặc "nat"
   }))
 }
 
 variable "private_subnets" {
-  description = "Map of private subnets configuration"
+  description = "Bản đồ cấu hình các subnet private và chỉ định rõ khóa NAT Gateway để định tuyến ra internet"
   type = map(object({
-    cidr_block        = string
-    availability_zone = string
-    type              = string # "app" or "db"
+    cidr_block           = string
+    availability_zone    = string
+    type                 = string # "app" hoặc "db"
+    nat_gateway_route_to = string # AZ của public subnet chứa NAT Gateway tương ứng (ví dụ: "public-nat-1a")
   }))
 }
 
@@ -50,22 +52,22 @@ variable "instance_type" {
 
 # Auto Scaling Group
 variable "min_size" {
-  description = "Số lượng instance tối thiểu"
+  description = "Số lượng máy chủ EC2 tối thiểu hoạt động trong Auto Scaling Group"
   type        = number
 }
 
 variable "max_size" {
-  description = "Số lượng instance tối đa"
+  description = "Số lượng máy chủ EC2 tối đa hoạt động trong Auto Scaling Group"
   type        = number
 }
 
 variable "desired_capacity" {
-  description = "Số lượng instance mong muốn"
+  description = "Số lượng máy chủ EC2 mong muốn chạy trong Auto Scaling Group"
   type        = number
 }
 
 variable "tags" {
-  description = "Các tags bổ sung cho tài nguyên"
+  description = "Bản đồ các thẻ (tags) bổ sung gán cho các tài nguyên hạ tầng"
   type        = map(string)
 }
 
@@ -118,7 +120,7 @@ variable "ecs_service_desired_count" {
 }
 
 variable "ecs_task_cpu" {
-  description = "Đơn vị CPU dùng cho task"
+  description = "Tổng đơn vị CPU cấp phát cho tác vụ ECS Task (vd: 512)"
   type        = number
 }
 

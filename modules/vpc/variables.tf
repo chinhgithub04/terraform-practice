@@ -1,5 +1,5 @@
 variable "availability_zones" {
-  description = "AZ to deploy resources"
+  description = "Danh sách các Availability Zones để triển khai tài nguyên"
   type        = list(string)
 }
 
@@ -14,19 +14,20 @@ variable "vpc_cidr" {
 }
 
 variable "public_subnets" {
-  description = "Map of public subnets configuration"
+  description = "Bản đồ cấu hình các subnet public (chia rõ loại cho ALB hoặc NAT Gateway)"
   type = map(object({
     cidr_block        = string
     availability_zone = string
+    type              = string # "alb" hoặc "nat"
   }))
 }
 
 variable "private_subnets" {
-  description = "Map of private subnets configuration"
+  description = "Bản đồ cấu hình các subnet private và chỉ định rõ khóa NAT Gateway để định tuyến ra internet"
   type = map(object({
-    cidr_block        = string
-    availability_zone = string
-    type              = string # "app" or "db"
+    cidr_block           = string
+    availability_zone    = string
+    type                 = string # "app" hoặc "db"
+    nat_gateway_route_to = string # AZ của public subnet chứa NAT Gateway tương ứng (ví dụ: "public-nat-1a")
   }))
 }
-

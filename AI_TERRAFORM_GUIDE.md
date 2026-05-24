@@ -111,7 +111,47 @@ AWS Auto Scaling Groups and EC2 Instances launched by ASG do not automatically i
 
 ---
 
-## 3. Strict Verification Workflow
+## 3. Vietnamese Language Standards for Descriptions
+
+All `description` fields in variables and outputs must be written in **Vietnamese**.
+
+### A. Variables Descriptions
+Every `variable` block must have a `description` field written entirely in Vietnamese:
+
+```hcl
+variable "vpc_cidr" {
+  description = "Dải IP của VPC"
+  type        = string
+}
+
+variable "instance_type" {
+  description = "Loại instance để sử dụng trong Launch Template"
+  type        = string
+}
+```
+
+### B. Outputs Descriptions
+Every `output` block must have a `description` field written entirely in Vietnamese:
+
+```hcl
+output "vpc_id" {
+  description = "ID của VPC vừa tạo"
+  value       = aws_vpc.this.id
+}
+
+output "alb_dns_name" {
+  description = "DNS name của ALB để truy cập ứng dụng"
+  value       = aws_lb.this.dns_name
+}
+```
+
+### C. Enforcement
+* **MANDATORY**: All descriptions must be translated to Vietnamese before code review or merge.
+* **Why**: Maintains consistency across the project for Vietnamese-speaking development teams.
+* **Scope**: Apply to all files containing variables and outputs in the `environments/` and `modules/` directories.
+
+
+## 4. Strict Verification Workflow
 
 Before committing any Terraform changes:
 1. **Formatting**: Run `terraform fmt -recursive` to enforce proper styling (canonical spacing and alignment).

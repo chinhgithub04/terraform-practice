@@ -6,35 +6,51 @@ project_name       = "xbrain-prod"
 # VPC (Non-overlapping CIDR block for production environment)
 vpc_cidr = "10.1.0.0/16"
 public_subnets = {
-  "public-1a" = {
+  "public-alb-1a" = {
     cidr_block        = "10.1.1.0/24"
     availability_zone = "us-east-1a"
+    type              = "alb"
   }
-  "public-1b" = {
+  "public-alb-1b" = {
     cidr_block        = "10.1.2.0/24"
     availability_zone = "us-east-1b"
+    type              = "alb"
+  }
+  "public-nat-1a" = {
+    cidr_block        = "10.1.10.0/26"
+    availability_zone = "us-east-1a"
+    type              = "nat"
+  }
+  "public-nat-1b" = {
+    cidr_block        = "10.1.20.0/26"
+    availability_zone = "us-east-1b"
+    type              = "nat"
   }
 }
 private_subnets = {
   "private-app-1a" = {
-    cidr_block        = "10.1.3.0/24"
-    availability_zone = "us-east-1a"
-    type              = "app"
+    cidr_block           = "10.1.3.0/24"
+    availability_zone    = "us-east-1a"
+    type                 = "app"
+    nat_gateway_route_to = "public-nat-1a"
   }
   "private-app-1b" = {
-    cidr_block        = "10.1.4.0/24"
-    availability_zone = "us-east-1b"
-    type              = "app"
+    cidr_block           = "10.1.4.0/24"
+    availability_zone    = "us-east-1b"
+    type                 = "app"
+    nat_gateway_route_to = "public-nat-1b"
   }
   "private-db-1a" = {
-    cidr_block        = "10.1.5.0/24"
-    availability_zone = "us-east-1a"
-    type              = "db"
+    cidr_block           = "10.1.5.0/24"
+    availability_zone    = "us-east-1a"
+    type                 = "db"
+    nat_gateway_route_to = "public-nat-1a"
   }
   "private-db-1b" = {
-    cidr_block        = "10.1.6.0/24"
-    availability_zone = "us-east-1b"
-    type              = "db"
+    cidr_block           = "10.1.6.0/24"
+    availability_zone    = "us-east-1b"
+    type                 = "db"
+    nat_gateway_route_to = "public-nat-1b"
   }
 }
 

@@ -4,16 +4,17 @@ output "vpc_id" {
 }
 
 output "vpc_cidr" {
-  value = aws_vpc.this.cidr_block
+  description = "Dải CIDR của VPC"
+  value       = aws_vpc.this.cidr_block
 }
 
 output "public_subnet_ids" {
-  description = "Danh sách ID của các subnet public"
-  value       = [for subnet in aws_subnet.public : subnet.id]
+  description = "Danh sách ID của các subnet public dùng cho ALB"
+  value       = [for k, subnet in aws_subnet.public : subnet.id if var.public_subnets[k].type == "alb"]
 }
 
 output "private_subnet_ids" {
-  description = "Danh sách ID của các private subnets"
+  description = "Danh sách ID của tất cả các subnet private"
   value       = [for subnet in aws_subnet.private : subnet.id]
 }
 
