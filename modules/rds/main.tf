@@ -38,16 +38,16 @@ resource "random_password" "db_password" {
 }
 
 resource "aws_db_instance" "this" {
-  identifier             = "${var.project_name}-db"
-  storage_type           = "gp3"
-  allocated_storage      = var.db_allocated_storage
-  engine                 = "mysql"
-  engine_version         = "8.0.45"
-  instance_class         = var.db_instance_class
+  identifier        = "${var.project_name}-db"
+  storage_type      = "gp3"
+  allocated_storage = var.db_allocated_storage
+  engine            = "mysql"
+  engine_version    = "8.0.45"
+  instance_class    = var.db_instance_class
 
-  db_name                = var.db_name
-  username               = "admin"
-  password               = random_password.db_password.result # self-managed
+  db_name  = var.db_name
+  username = "admin"
+  password = random_password.db_password.result # self-managed
 
   multi_az               = true
   port                   = 3306
@@ -69,7 +69,7 @@ resource "aws_secretsmanager_secret" "db_secret" {
 }
 
 resource "aws_secretsmanager_secret_version" "db_secret_val" {
-  secret_id     = aws_secretsmanager_secret.db_secret.id
+  secret_id = aws_secretsmanager_secret.db_secret.id
   secret_string = jsonencode({
     username = aws_db_instance.this.username
     password = random_password.db_password.result

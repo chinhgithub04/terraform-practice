@@ -150,8 +150,37 @@ output "alb_dns_name" {
 * **Why**: Maintains consistency across the project for Vietnamese-speaking development teams.
 * **Scope**: Apply to all files containing variables and outputs in the `environments/` and `modules/` directories.
 
+## 4. Complex Logic and Iteration in Locals
 
-## 4. Strict Verification Workflow
+To keep resource definitions clean and readable, complex iteration logic, filtering, or transformations must be defined inside `locals` blocks rather than inline within resource arguments like `for_each`.
+
+### Enforcement
+1. Do **NOT** write `for` expressions with conditions (e.g., `if`) directly inside `for_each` or other resource arguments.
+2. Define a descriptive local variable in a `locals` block.
+3. Reference that local variable in the resource properties.
+
+### Example (MANDATORY):
+**Avoid (Bad Practice):**
+```hcl
+resource "aws_route_table_association" "private" {
+  for_each = { for k, v in var.private_subnets : k => v if v.nat_gateway_route_to != null }
+  # ...
+}
+```
+
+**Correct (Good Practice):**
+```hcl
+locals {
+  private_subnets_with_nat = { for k, v in var.private_subnets : k => v if v.nat_gateway_route_to != null }
+}
+
+resource "aws_route_table_association" "private" {
+  for_each = local.private_subnets_with_nat
+  # ...
+}
+```
+
+## 5. Strict Verification Workflow
 
 Before committing any Terraform changes:
 1. **Formatting**: Run `terraform fmt -recursive` to enforce proper styling (canonical spacing and alignment).

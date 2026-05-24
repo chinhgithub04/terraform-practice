@@ -52,7 +52,8 @@ resource "aws_subnet" "private" {
 # =============================================================================
 
 locals {
-  nat_subnets = { for k, v in var.public_subnets : k => v if v.type == "nat" }
+  nat_subnets              = { for k, v in var.public_subnets : k => v if v.type == "nat" }
+  private_subnets_with_nat = { for k, v in var.private_subnets : k => v if v.nat_gateway_route_to != null }
 }
 
 # 5. Elastic IPs cho các NAT Gateway (chỉ tạo ở subnet public có type là "nat")
@@ -115,7 +116,7 @@ resource "aws_route_table_association" "public" {
 
 # 10. Route Table Associations (Private Subnets)
 resource "aws_route_table_association" "private" {
-  for_each = var.private_subnets
+  for_each = local.private_subnets_with_nat
 
   subnet_id      = aws_subnet.private[each.key].id
   route_table_id = aws_route_table.private[each.value.nat_gateway_route_to].id
