@@ -1,11 +1,3 @@
-locals {
-  default_tags = {
-    Name      = "${var.project_name}-ecs"
-    ManagedBy = "Terraform"
-  }
-  merged_tags = merge(local.default_tags, var.tags)
-}
-
 resource "aws_ecs_cluster" "this" {
   name = var.ecs_cluster_name
 
@@ -14,7 +6,9 @@ resource "aws_ecs_cluster" "this" {
     value = "enabled"
   }
 
-  tags = local.merged_tags
+  tags = {
+    Name = var.ecs_cluster_name
+  }
 }
 
 resource "aws_ecs_capacity_provider" "this" {
@@ -22,17 +16,19 @@ resource "aws_ecs_capacity_provider" "this" {
 
   auto_scaling_group_provider {
     auto_scaling_group_arn         = var.asg_arn
-    managed_termination_protection = var.managed_termination_protection
+    managed_termination_protection = "ENABLED"
 
     managed_scaling {
       minimum_scaling_step_size = 1  # Mỗi lần tăng/giảm tối thiểu bao nhiêu máy chủ
       maximum_scaling_step_size = 10 # Mỗi lần tăng/giảm tối đa bao nhiêu máy chủ
-      status                    = var.managed_scaling_status
-      target_capacity           = var.target_capacity
+      status                    = "ENABLED"
+      target_capacity           = 80
     }
   }
 
-  tags = local.merged_tags
+  tags = {
+    Name = "${var.project_name}-ecs-capacity-provider"
+  }
 }
 
 resource "aws_ecs_cluster_capacity_providers" "this" {
@@ -53,7 +49,9 @@ resource "aws_cloudwatch_log_group" "ecs_task_logs" {
   name              = "/ecs/${var.task_family}"
   retention_in_days = 7
 
-  tags = local.merged_tags
+  tags = {
+    Name = "${var.project_name}-ecs-task-logs"
+  }
 }
 
 # ECS Task Execution Role & Task Role
@@ -72,7 +70,9 @@ resource "aws_iam_role" "ecs_task_execution_role" {
   name               = "${var.project_name}-ecs-task-execution-role"
   assume_role_policy = data.aws_iam_policy_document.ecs_tasks_assume_role.json
 
-  tags = local.merged_tags
+  tags = {
+    Name = "${var.project_name}-ecs-task-execution-role"
+  }
 }
 
 resource "aws_iam_role_policy_attachment" "ecs_task_execution_role_policy" {
@@ -84,7 +84,9 @@ resource "aws_iam_role" "ecs_task_role" {
   name               = "${var.project_name}-ecs-task-role"
   assume_role_policy = data.aws_iam_policy_document.ecs_tasks_assume_role.json
 
-  tags = local.merged_tags
+  tags = {
+    Name = "${var.project_name}-ecs-task-role"
+  }
 }
 
 resource "aws_ecs_task_definition" "this" {
@@ -93,7 +95,7 @@ resource "aws_ecs_task_definition" "this" {
     operating_system_family = "LINUX"
     cpu_architecture        = "X86_64"
   }
-  network_mode             = var.task_network_mode
+  network_mode             = "awsvpc"
   requires_compatibilities = ["EC2"] # Launch type
   cpu                      = var.task_cpu
   memory                   = var.task_memory
@@ -110,8 +112,8 @@ resource "aws_ecs_task_definition" "this" {
       essential         = true # Nếu container này sập thì toàn bộ Task sẽ được khởi động lại
       portMappings = [
         {
-          containerPort = var.container_port
-          hostPort      = var.container_port
+          containerPort = 8080
+          hostPort      = 8080
           protocol      = "tcp"
         }
       ]
@@ -126,7 +128,9 @@ resource "aws_ecs_task_definition" "this" {
     }
   ])
 
-  tags = local.merged_tags
+  tags = {
+    Name = var.task_family
+  }
 }
 
 resource "aws_ecs_service" "this" {
@@ -149,12 +153,14 @@ resource "aws_ecs_service" "this" {
   load_balancer {
     target_group_arn = var.target_group_arn
     container_name   = var.container_name
-    container_port   = var.container_port
+    container_port   = 8080
   }
 
   lifecycle {
     ignore_changes = [desired_count]
   }
 
-  tags = local.merged_tags
+  tags = {
+    Name = var.ecs_service_name
+  }
 }

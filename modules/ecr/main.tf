@@ -1,20 +1,16 @@
-locals {
-  default_tags = {
-    Name      = "${var.project_name}-ecr"
-    ManagedBy = "Terraform"
-  }
-  merged_tags = merge(local.default_tags, var.tags)
-}
+
 
 resource "aws_ecr_repository" "this" {
   name                 = var.ecr_repository_name
-  image_tag_mutability = var.image_tag_mutability
+  image_tag_mutability = "IMMUTABLE"
 
   image_scanning_configuration {
-    scan_on_push = var.scan_on_push
+    scan_on_push = true
   }
 
-  tags = local.merged_tags
+  tags = {
+    Name = "${var.project_name}-ecr"
+  }
 }
 
 resource "aws_ecr_lifecycle_policy" "this" {

@@ -1,16 +1,10 @@
-locals {
-  default_tags = {
-    Name      = "${var.project_name}-rds"
-    ManagedBy = "Terraform"
-  }
-  merged_tags = merge(local.default_tags, var.tags)
-}
-
 resource "aws_db_subnet_group" "this" {
   name       = "${var.project_name}-db-subnet-group"
   subnet_ids = var.rds_subnet_ids
 
-  tags = local.merged_tags
+  tags = {
+    Name = "${var.project_name}-db-subnet-group"
+  }
 }
 
 resource "aws_security_group" "rds" {
@@ -19,8 +13,8 @@ resource "aws_security_group" "rds" {
   vpc_id      = var.vpc_id
 
   ingress {
-    from_port       = var.db_port
-    to_port         = var.db_port
+    from_port       = 3306
+    to_port         = 3306
     protocol        = "tcp"
     security_groups = [var.app_security_group_id]
   }
@@ -33,42 +27,45 @@ resource "aws_security_group" "rds" {
   }
 
   tags = {
-    Name      = "${var.project_name}-rds-sg"
-    ManagedBy = "Terraform"
+    Name = "${var.project_name}-rds-sg"
   }
 }
 
 resource "random_password" "db_password" {
-  length = 16
-  special = true
+  length           = 16
+  special          = true
   override_special = "!#$%&*()-_=+[]{}<>:?"
 }
 
 resource "aws_db_instance" "this" {
   identifier             = "${var.project_name}-db"
-  storage_type          = var.db_storage_type
+  storage_type           = "gp3"
   allocated_storage      = var.db_allocated_storage
-  engine                 = var.db_engine
-  engine_version         = var.db_engine_version
+  engine                 = "mysql"
+  engine_version         = "8.0.45"
   instance_class         = var.db_instance_class
 
   db_name                = var.db_name
-  username               = var.db_username
+  username               = "admin"
   password               = random_password.db_password.result # self-managed
 
-  multi_az = true
-  port                   = var.db_port
+  multi_az               = true
+  port                   = 3306
   db_subnet_group_name   = aws_db_subnet_group.this.name
   vpc_security_group_ids = [aws_security_group.rds.id]
   skip_final_snapshot    = true
 
-  tags = local.merged_tags
+  tags = {
+    Name = "${var.project_name}-rds-db"
+  }
 }
 
 resource "aws_secretsmanager_secret" "db_secret" {
   name_prefix = "${var.project_name}-db-secret-"
   description = "Secret chứa thông tin kết nối RDS database"
-  tags = local.merged_tags
+  tags = {
+    Name = "${var.project_name}-rds-db-secret"
+  }
 }
 
 resource "aws_secretsmanager_secret_version" "db_secret_val" {
@@ -89,4 +86,3 @@ resource "aws_secretsmanager_secret_version" "db_secret_val" {
     )
   })
 }
-

@@ -1,10 +1,9 @@
 locals {
-  default_tags = {
-    Name      = "${var.project_name}-asg"
-    ManagedBy = "Terraform"
+  name_tag = {
+    Name = "${var.project_name}-asg"
   }
 
-  merged_tags = merge(local.default_tags, var.tags)
+  merged_tags = merge(local.name_tag, var.tags)
 }
 
 # 1. Security Group cho ASG
@@ -13,14 +12,11 @@ resource "aws_security_group" "asg" {
   description = "Security group for ASG instances"
   vpc_id      = var.vpc_id
 
-  dynamic "ingress" {
-    for_each = var.app_cidr_blocks
-    content {
-      from_port   = var.app_port
-      to_port     = var.app_port
-      protocol    = "tcp"
-      cidr_blocks = [ingress.value]
-    }
+  ingress {
+    from_port   = 8080
+    to_port     = 8080
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
   }
 
   egress {
@@ -45,21 +41,18 @@ resource "aws_launch_template" "this" {
   }))
   vpc_security_group_ids = [aws_security_group.asg.id]
 
-  dynamic "iam_instance_profile" {
-    for_each = var.iam_instance_profile_name == null ? [] : [var.iam_instance_profile_name]
-    content {
-      name = iam_instance_profile.value
-    }
+  iam_instance_profile {
+    name = aws_iam_instance_profile.app_server_profile.name
   }
 
   block_device_mappings {
-    device_name = var.ebs_device_name
+    device_name = "/dev/xvda"
 
     ebs {
-      volume_size           = var.ebs_volume_size
-      volume_type           = var.ebs_volume_type
-      delete_on_termination = var.ebs_delete_on_termination
-      encrypted             = var.ebs_encrypted
+      volume_size           = 8
+      volume_type           = "gp3"
+      delete_on_termination = true
+      encrypted             = true
     }
   }
 
@@ -83,8 +76,8 @@ resource "aws_autoscaling_group" "this" {
   min_size                  = var.min_size
   desired_capacity          = var.desired_capacity
   vpc_zone_identifier       = var.private_subnet_ids
-  health_check_type         = var.health_check_type
-  health_check_grace_period = var.health_check_grace_period
+  health_check_type         = "EC2"
+  health_check_grace_period = 300
   protect_from_scale_in     = true
 
   launch_template {
@@ -100,4 +93,43 @@ resource "aws_autoscaling_group" "this" {
       propagate_at_launch = true
     }
   }
+}
+
+# ==========================================
+# IAM Role và Instance Profile tự đóng gói cho ASG
+# ==========================================
+
+data "aws_iam_policy_document" "ec2_assume_role" {
+  statement {
+    actions = ["sts:AssumeRole"]
+
+    principals {
+      type        = "Service"
+      identifiers = ["ec2.amazonaws.com"]
+    }
+  }
+}
+
+resource "aws_iam_role" "app_server_role" {
+  name               = "${var.project_name}-app-server-role"
+  assume_role_policy = data.aws_iam_policy_document.ec2_assume_role.json
+
+  tags = {
+    Name = "${var.project_name}-app-server-role"
+  }
+}
+
+resource "aws_iam_role_policy_attachment" "ssm_core_attach" {
+  role       = aws_iam_role.app_server_role.name
+  policy_arn = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
+}
+
+resource "aws_iam_role_policy_attachment" "ecs_instance_role_attach" {
+  role       = aws_iam_role.app_server_role.name
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonEC2ContainerServiceforEC2Role"
+}
+
+resource "aws_iam_instance_profile" "app_server_profile" {
+  name = "${var.project_name}-app-server-instance-profile"
+  role = aws_iam_role.app_server_role.name
 }

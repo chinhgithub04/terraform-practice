@@ -1,8 +1,3 @@
-variable "aws_region" {
-  description = "Region định danh cho tài nguyên"
-  type        = string
-}
-
 variable "availability_zones" {
   description = "AZ to deploy resources"
   type        = list(string)
@@ -25,3 +20,4 @@ variable "public_subnet_cidrs" {
 variable "private_subnet_cidrs" {
   type = list(string)
 }
+
