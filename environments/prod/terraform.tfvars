@@ -15,7 +15,28 @@ public_subnets = {
     availability_zone = "us-east-1b"
   }
 }
-private_subnet_cidrs = ["10.1.3.0/24", "10.1.4.0/24", "10.1.5.0/24", "10.1.6.0/24"]
+private_subnets = {
+  "private-app-1a" = {
+    cidr_block        = "10.1.3.0/24"
+    availability_zone = "us-east-1a"
+    type              = "app"
+  }
+  "private-app-1b" = {
+    cidr_block        = "10.1.4.0/24"
+    availability_zone = "us-east-1b"
+    type              = "app"
+  }
+  "private-db-1a" = {
+    cidr_block        = "10.1.5.0/24"
+    availability_zone = "us-east-1a"
+    type              = "db"
+  }
+  "private-db-1b" = {
+    cidr_block        = "10.1.6.0/24"
+    availability_zone = "us-east-1b"
+    type              = "db"
+  }
+}
 
 # EC2 / ASG (High availability and larger scale for production)
 ami_id           = "ami-098e39bafa7e7303d"

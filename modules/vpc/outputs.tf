@@ -14,17 +14,17 @@ output "public_subnet_ids" {
 
 output "private_subnet_ids" {
   description = "Danh sách ID của các private subnets"
-  value       = aws_subnet.private[*].id
+  value       = [for subnet in aws_subnet.private : subnet.id]
 }
 
 output "app_subnet_ids" {
-  description = "Danh sách ID của các subnet private dùng cho ứng dụng (số lượng bằng số AZ)"
-  value       = slice(aws_subnet.private[*].id, 0, length(var.availability_zones))
+  description = "Danh sách ID của các subnet private dùng cho ứng dụng"
+  value       = [for key, subnet in aws_subnet.private : subnet.id if var.private_subnets[key].type == "app"]
 }
 
 output "rds_subnet_ids" {
-  description = "Danh sách ID của các subnet private dùng cho RDS (số lượng bằng số AZ)"
-  value       = slice(aws_subnet.private[*].id, length(var.availability_zones), length(var.private_subnet_cidrs))
+  description = "Danh sách ID của các subnet private dùng cho RDS"
+  value       = [for key, subnet in aws_subnet.private : subnet.id if var.private_subnets[key].type == "db"]
 }
 
 output "igw_id" {

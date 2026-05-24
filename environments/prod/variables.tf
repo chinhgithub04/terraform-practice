@@ -28,9 +28,13 @@ variable "public_subnets" {
   }))
 }
 
-variable "private_subnet_cidrs" {
-  description = "Private Subnet CIDR blocks"
-  type        = list(string)
+variable "private_subnets" {
+  description = "Map of private subnets configuration"
+  type = map(object({
+    cidr_block        = string
+    availability_zone = string
+    type              = string # "app" or "db"
+  }))
 }
 
 # Launch Template / EC2
