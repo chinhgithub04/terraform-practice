@@ -8,7 +8,7 @@ variable "vpc_id" {
   type        = string
 }
 
-variable "public_subnet_ids" {
+variable "alb_subnet_ids" {
   description = "Danh sách ID các public subnet để đặt ALB"
   type        = list(string)
 }

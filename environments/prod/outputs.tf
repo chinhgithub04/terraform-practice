@@ -28,9 +28,9 @@ output "vpc_cidr" {
   value       = module.vpc.vpc_cidr
 }
 
-output "public_subnet_ids" {
-  description = "Danh sách ID của các subnet public"
-  value       = module.vpc.public_subnet_ids
+output "alb_subnet_ids" {
+  description = "Danh sách ID của các subnet public dùng cho ALB"
+  value       = module.vpc.alb_subnet_ids
 }
 
 output "private_subnet_ids" {

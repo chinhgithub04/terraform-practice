@@ -1,3 +1,10 @@
+locals {
+  alb_subnet_ids     = [for k, subnet in aws_subnet.public : subnet.id if var.public_subnets[k].type == "alb"]
+  private_subnet_ids = [for subnet in aws_subnet.private : subnet.id]
+  app_subnet_ids     = [for key, subnet in aws_subnet.private : subnet.id if var.private_subnets[key].type == "app"]
+  rds_subnet_ids     = [for key, subnet in aws_subnet.private : subnet.id if var.private_subnets[key].type == "db"]
+}
+
 output "vpc_id" {
   description = "ID của VPC vừa tạo"
   value       = aws_vpc.this.id
@@ -8,24 +15,24 @@ output "vpc_cidr" {
   value       = aws_vpc.this.cidr_block
 }
 
-output "public_subnet_ids" {
+output "alb_subnet_ids" {
   description = "Danh sách ID của các subnet public dùng cho ALB"
-  value       = [for k, subnet in aws_subnet.public : subnet.id if var.public_subnets[k].type == "alb"]
+  value       = local.alb_subnet_ids
 }
 
 output "private_subnet_ids" {
   description = "Danh sách ID của tất cả các subnet private"
-  value       = [for subnet in aws_subnet.private : subnet.id]
+  value       = local.private_subnet_ids
 }
 
 output "app_subnet_ids" {
   description = "Danh sách ID của các subnet private dùng cho ứng dụng"
-  value       = [for key, subnet in aws_subnet.private : subnet.id if var.private_subnets[key].type == "app"]
+  value       = local.app_subnet_ids
 }
 
 output "rds_subnet_ids" {
   description = "Danh sách ID của các subnet private dùng cho RDS"
-  value       = [for key, subnet in aws_subnet.private : subnet.id if var.private_subnets[key].type == "db"]
+  value       = local.rds_subnet_ids
 }
 
 output "igw_id" {
