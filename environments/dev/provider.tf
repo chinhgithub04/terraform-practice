@@ -7,11 +7,11 @@ terraform {
   }
 
   backend "s3" {
-    bucket         = "xbrain-terraform-s3-tfstate"
-    key            = "dev/xbrain-vpc.tfstate"
-    region         = "us-east-1"
-    encrypt        = true
-    use_lockfile   = true
+    bucket       = "xbrain-terraform-s3-tfstate"
+    key          = "dev/xbrain-vpc.tfstate"
+    region       = "us-east-1"
+    encrypt      = true
+    use_lockfile = true
   }
 }
 
