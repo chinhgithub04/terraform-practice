@@ -11,7 +11,7 @@ terraform {
     key            = "prod/xbrain-vpc.tfstate"
     region         = "us-east-1"
     encrypt        = true
-    dynamodb_table = "xbrain-dynamodb-terraform"
+    use_lockfile   = true
   }
 }
 
