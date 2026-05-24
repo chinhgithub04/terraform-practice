@@ -27,3 +27,8 @@ output "alb_arn" {
   description = "ARN của ALB"
   value       = aws_lb.this.arn
 }
+
+output "alb_security_group_id" {
+  description = "Security Group ID của ALB"
+  value       = aws_security_group.alb.id
+}

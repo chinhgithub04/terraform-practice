@@ -19,16 +19,17 @@ module "alb" {
 module "asg" {
   source = "../../modules/asg"
 
-  project_name       = var.project_name
-  vpc_id             = module.vpc.vpc_id
-  ecs_cluster_name   = var.ecs_cluster_name
-  private_subnet_ids = module.vpc.app_subnet_ids
-  ami_id             = var.ami_id
-  instance_type      = var.instance_type
-  min_size           = var.min_size
-  max_size           = var.max_size
-  desired_capacity   = var.desired_capacity
-  tags               = var.tags
+  project_name          = var.project_name
+  vpc_id                = module.vpc.vpc_id
+  alb_security_group_id = module.alb.alb_security_group_id
+  ecs_cluster_name      = var.ecs_cluster_name
+  private_subnet_ids    = module.vpc.app_subnet_ids
+  ami_id                = var.ami_id
+  instance_type         = var.instance_type
+  min_size              = var.min_size
+  max_size              = var.max_size
+  desired_capacity      = var.desired_capacity
+  tags                  = var.tags
 }
 
 module "rds" {

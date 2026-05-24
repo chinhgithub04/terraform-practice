@@ -8,6 +8,11 @@ variable "vpc_id" {
   type        = string
 }
 
+variable "alb_security_group_id" {
+  description = "ID của Security Group ALB để cho phép kết nối vào ASG"
+  type        = string
+}
+
 variable "ecs_cluster_name" {
   description = "Tên của ECS Cluster để EC2 đăng ký vào"
   type        = string

@@ -156,6 +156,9 @@ resource "aws_ecs_service" "this" {
     container_port   = 8080
   }
 
+  propagate_tags          = "SERVICE"
+  enable_ecs_managed_tags = true
+
   lifecycle {
     ignore_changes = [desired_count]
   }
