@@ -4,7 +4,7 @@ module "vpc" {
   project_name         = var.project_name
   availability_zones   = var.availability_zones
   vpc_cidr             = var.vpc_cidr
-  public_subnet_cidrs  = var.public_subnet_cidrs
+  public_subnets       = var.public_subnets
   private_subnet_cidrs = var.private_subnet_cidrs
 }
 

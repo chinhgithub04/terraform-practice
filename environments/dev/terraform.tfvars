@@ -1,11 +1,20 @@
 # Global
 aws_region         = "us-east-1"
 availability_zones = ["us-east-1a", "us-east-1b"]
-project_name       = "xbrain-project-dev"
+project_name       = "xbrain-dev"
 
 # VPC
-vpc_cidr             = "10.0.0.0/16"
-public_subnet_cidrs  = ["10.0.1.0/24", "10.0.2.0/24"]
+vpc_cidr = "10.0.0.0/16"
+public_subnets = {
+  "public-1a" = {
+    cidr_block        = "10.0.1.0/24"
+    availability_zone = "us-east-1a"
+  }
+  "public-1b" = {
+    cidr_block        = "10.0.2.0/24"
+    availability_zone = "us-east-1b"
+  }
+}
 private_subnet_cidrs = ["10.0.3.0/24", "10.0.4.0/24", "10.0.5.0/24", "10.0.6.0/24"]
 
 # EC2 / ASG
@@ -21,7 +30,7 @@ db_allocated_storage = 20
 db_name              = "merxly_dev"
 
 # ECR
-ecr_repository_name  = "xbrain-app-repo-dev"
+ecr_repository_name = "xbrain-app-repo-dev"
 
 # ECS
 ecs_cluster_name            = "xbrain-ecs-cluster-dev"

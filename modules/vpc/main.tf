@@ -21,14 +21,14 @@ resource "aws_internet_gateway" "main" {
 
 # 3. Public Subnets
 resource "aws_subnet" "public" {
-  count                   = length(var.public_subnet_cidrs)
+  for_each                = var.public_subnets
   vpc_id                  = aws_vpc.this.id
-  cidr_block              = var.public_subnet_cidrs[count.index]
-  availability_zone       = var.availability_zones[count.index]
+  cidr_block              = each.value.cidr_block
+  availability_zone       = each.value.az
   map_public_ip_on_launch = true
 
   tags = {
-    Name = "${var.project_name}-public${count.index + 1}-${var.availability_zones[count.index]}"
+    Name = "${var.project_name}-${each.key}"
   }
 }
 
@@ -61,7 +61,8 @@ resource "aws_route_table" "public" {
 
 # 6. Route Table Association
 resource "aws_route_table_association" "public" {
-  count          = length(var.public_subnet_cidrs)
-  subnet_id      = aws_subnet.public[count.index].id
+  for_each = aws_subnet.public
+
+  subnet_id      = each.value.id
   route_table_id = aws_route_table.public.id
 }

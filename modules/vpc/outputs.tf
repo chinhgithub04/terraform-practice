@@ -9,7 +9,7 @@ output "vpc_cidr" {
 
 output "public_subnet_ids" {
   description = "Danh sách ID của các subnet public"
-  value       = aws_subnet.public[*].id
+  value       = [for subnet in aws_subnet.public : subnet.id]
 }
 
 output "private_subnet_ids" {
