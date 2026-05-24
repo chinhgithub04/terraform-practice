@@ -1,7 +1,17 @@
 name: 'Terraform Destroy'
 
 on:
-  workflow_dispatch: # Cho phép bạn nhấn nút chạy thủ công trên giao diện GitHub
+  workflow_dispatch: # Cho phép nhấn nút chạy thủ công trên giao diện GitHub
+    inputs:
+      environment:
+        description: 'Environment to destroy (dev, prod, or main)'
+        required: true
+        default: 'dev'
+        type: choice
+        options:
+          - dev
+          - prod
+          - main
 
 permissions:
   contents: read
@@ -18,5 +28,21 @@ jobs:
           aws-region: us-east-1
       - uses: hashicorp/setup-terraform@v3
 
-      - run: terraform init
-      - run: terraform destroy -auto-approve
+      - name: Determine Environment Path
+        id: environment
+        run: |
+          if [ "${{ github.event.inputs.environment }}" == "dev" ]; then
+            echo "env_path=environments/dev" >> $GITHUB_OUTPUT
+          elif [ "${{ github.event.inputs.environment }}" == "prod" ]; then
+            echo "env_path=environments/prod" >> $GITHUB_OUTPUT
+          else
+            echo "env_path=." >> $GITHUB_OUTPUT
+          fi
+
+      - name: Terraform Init
+        run: terraform init
+        working-directory: ${{ steps.environment.outputs.env_path }}
+
+      - name: Terraform Destroy
+        run: terraform destroy -auto-approve
+        working-directory: ${{ steps.environment.outputs.env_path }}
