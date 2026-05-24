@@ -27,7 +27,7 @@ variable "private_subnets" {
   type = map(object({
     cidr_block           = string
     availability_zone    = string
-    type                 = string # "app" hoặc "db"
-    nat_gateway_route_to = string # AZ của public subnet chứa NAT Gateway tương ứng (ví dụ: "public-nat-1a")
+    type                 = string           # "app" hoặc "db"
+    nat_gateway_route_to = optional(string) # AZ của public subnet chứa NAT Gateway tương ứng, có thể null.
   }))
 }

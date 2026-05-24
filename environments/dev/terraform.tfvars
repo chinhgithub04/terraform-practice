@@ -36,16 +36,14 @@ private_subnets = {
     nat_gateway_route_to = "public-nat-1a"
   }
   "private-db-1a" = {
-    cidr_block           = "10.0.5.0/24"
-    availability_zone    = "us-east-1a"
-    type                 = "db"
-    nat_gateway_route_to = "public-nat-1a"
+    cidr_block        = "10.0.5.0/24"
+    availability_zone = "us-east-1a"
+    type              = "db"
   }
   "private-db-1b" = {
-    cidr_block           = "10.0.6.0/24"
-    availability_zone    = "us-east-1b"
-    type                 = "db"
-    nat_gateway_route_to = "public-nat-1a"
+    cidr_block        = "10.0.6.0/24"
+    availability_zone = "us-east-1b"
+    type              = "db"
   }
 }
 
