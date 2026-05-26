@@ -69,3 +69,8 @@ variable "ecs_service_security_groups" {
   description = "Danh sách ID các security group áp dụng cho ECS tasks"
   type        = list(string)
 }
+
+variable "ecr_repository_arn" {
+  description = "ARN của ECR repository để cấp quyền cho task execution role"
+  type        = string
+}

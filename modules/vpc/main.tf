@@ -121,3 +121,83 @@ resource "aws_route_table_association" "private" {
   subnet_id      = aws_subnet.private[each.key].id
   route_table_id = aws_route_table.private[each.value.nat_gateway_route_to].id
 }
+
+# =============================================================================
+# VPC ENDPOINTS CHO ECR VÀ CLOUDWATCH LOGS
+# =============================================================================
+
+resource "aws_security_group" "vpc_endpoints" {
+  name_prefix = "${var.project_name}-vpce-sg"
+  description = "Security group for VPC Endpoints (ECR, Logs)"
+  vpc_id      = aws_vpc.this.id
+
+  ingress {
+    from_port   = 443
+    to_port     = 443
+    protocol    = "tcp"
+    cidr_blocks = [aws_vpc.this.cidr_block]
+  }
+
+  tags = {
+    Name = "${var.project_name}-vpce-sg"
+  }
+}
+
+locals {
+  # Lọc ID của private subnets dành cho ứng dụng (app) để gán cho các Interface Endpoints
+  endpoint_subnet_ids = [for key, subnet in aws_subnet.private : subnet.id if var.private_subnets[key].type == "app"]
+}
+
+# 11. Interface Endpoint cho ECR API
+resource "aws_vpc_endpoint" "ecr_api" {
+  vpc_id              = aws_vpc.this.id
+  service_name        = "com.amazonaws.${var.aws_region}.ecr.api"
+  vpc_endpoint_type   = "Interface"
+  private_dns_enabled = true
+  subnet_ids          = local.endpoint_subnet_ids
+  security_group_ids  = [aws_security_group.vpc_endpoints.id]
+
+  tags = {
+    Name = "${var.project_name}-vpce-ecr-api"
+  }
+}
+
+# 12. Interface Endpoint cho ECR DKR
+resource "aws_vpc_endpoint" "ecr_dkr" {
+  vpc_id              = aws_vpc.this.id
+  service_name        = "com.amazonaws.${var.aws_region}.ecr.dkr"
+  vpc_endpoint_type   = "Interface"
+  private_dns_enabled = true
+  subnet_ids          = local.endpoint_subnet_ids
+  security_group_ids  = [aws_security_group.vpc_endpoints.id]
+
+  tags = {
+    Name = "${var.project_name}-vpce-ecr-dkr"
+  }
+}
+
+# 13. Interface Endpoint cho CloudWatch Logs
+resource "aws_vpc_endpoint" "logs" {
+  vpc_id              = aws_vpc.this.id
+  service_name        = "com.amazonaws.${var.aws_region}.logs"
+  vpc_endpoint_type   = "Interface"
+  private_dns_enabled = true
+  subnet_ids          = local.endpoint_subnet_ids
+  security_group_ids  = [aws_security_group.vpc_endpoints.id]
+
+  tags = {
+    Name = "${var.project_name}-vpce-logs"
+  }
+}
+
+# 14. Gateway Endpoint cho S3 (Miễn phí giờ duy trì, ECR dùng S3 để chứa layers)
+resource "aws_vpc_endpoint" "s3" {
+  vpc_id            = aws_vpc.this.id
+  service_name      = "com.amazonaws.${var.aws_region}.s3"
+  vpc_endpoint_type = "Gateway"
+  route_table_ids   = [for rt in aws_route_table.private : rt.id]
+
+  tags = {
+    Name = "${var.project_name}-vpce-s3"
+  }
+}

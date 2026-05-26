@@ -75,9 +75,36 @@ resource "aws_iam_role" "ecs_task_execution_role" {
   }
 }
 
-resource "aws_iam_role_policy_attachment" "ecs_task_execution_role_policy" {
-  role       = aws_iam_role.ecs_task_execution_role.name
-  policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"
+data "aws_iam_policy_document" "ecs_task_execution_custom_policy" {
+  statement {
+    actions = [
+      "ecr:GetAuthorizationToken"
+    ]
+    resources = ["*"]
+  }
+
+  statement {
+    actions = [
+      "ecr:BatchCheckLayerAvailability",
+      "ecr:GetDownloadUrlForLayer",
+      "ecr:BatchGetImage"
+    ]
+    resources = [var.ecr_repository_arn]
+  }
+
+  statement {
+    actions = [
+      "logs:CreateLogStream",
+      "logs:PutLogEvents"
+    ]
+    resources = ["${aws_cloudwatch_log_group.ecs_task_logs.arn}:*"]
+  }
+}
+
+resource "aws_iam_role_policy" "ecs_task_execution_custom_policy" {
+  name   = "${var.project_name}-ecs-task-execution-policy"
+  role   = aws_iam_role.ecs_task_execution_role.id
+  policy = data.aws_iam_policy_document.ecs_task_execution_custom_policy.json
 }
 
 resource "aws_iam_role" "ecs_task_role" {

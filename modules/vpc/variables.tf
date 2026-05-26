@@ -1,3 +1,8 @@
+variable "aws_region" {
+  description = "Region triển khai VPC"
+  type        = string
+}
+
 variable "availability_zones" {
   description = "Danh sách các Availability Zones để triển khai tài nguyên"
   type        = list(string)

@@ -1,6 +1,7 @@
 module "vpc" {
   source = "../../modules/vpc"
 
+  aws_region         = var.aws_region
   project_name       = var.project_name
   availability_zones = var.availability_zones
   vpc_cidr           = var.vpc_cidr
@@ -60,6 +61,7 @@ module "ecs" {
   task_family                 = var.ecs_task_family
   container_name              = var.ecs_container_name
   container_image             = module.ecr.ecr_repository_url
+  ecr_repository_arn          = module.ecr.ecr_repository_arn
   task_cpu                    = var.ecs_task_cpu
   task_memory                 = var.ecs_task_memory
   task_memory_reservation     = var.ecs_task_memory_reservation
