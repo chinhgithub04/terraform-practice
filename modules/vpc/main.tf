@@ -10,8 +10,9 @@ resource "aws_vpc" "this" {
   }
 }
 
-# 2. Internet Gateway
+# 2. Internet Gateway (Chỉ tạo nếu có Public Subnets)
 resource "aws_internet_gateway" "main" {
+  count  = length(var.public_subnets) > 0 ? 1 : 0
   vpc_id = aws_vpc.this.id
 
   tags = {
@@ -53,7 +54,7 @@ resource "aws_subnet" "private" {
 
 locals {
   nat_subnets              = { for k, v in var.public_subnets : k => v if v.type == "nat" }
-  private_subnets_with_nat = { for k, v in var.private_subnets : k => v if v.nat_gateway_route_to != null }
+  private_subnets_with_nat = { for k, v in var.private_subnets : k => v if v.nat_gateway_route_to != null && length(local.nat_subnets) > 0 }
 }
 
 # 5. Elastic IPs cho các NAT Gateway (chỉ tạo ở subnet public có type là "nat")
@@ -79,11 +80,12 @@ resource "aws_nat_gateway" "this" {
 
 # 7. Route Table cho Public Subnets
 resource "aws_route_table" "public" {
+  count  = length(var.public_subnets) > 0 ? 1 : 0
   vpc_id = aws_vpc.this.id
 
   route {
     cidr_block = "0.0.0.0/0"
-    gateway_id = aws_internet_gateway.main.id
+    gateway_id = aws_internet_gateway.main[0].id
   }
 
   tags = {
@@ -106,15 +108,26 @@ resource "aws_route_table" "private" {
   }
 }
 
+# Kịch bản B: Không có NAT Gateways nhưng có Private Subnets -> Tạo 1 RT chung để định tuyến Gateway Endpoints (ví dụ: S3) miễn phí
+resource "aws_route_table" "private_no_nat" {
+  count  = length(local.nat_subnets) == 0 && length(var.private_subnets) > 0 ? 1 : 0
+  vpc_id = aws_vpc.this.id
+
+  tags = {
+    Name = "${var.project_name}-private-rt"
+  }
+}
+
 # 9. Route Table Association (Public Subnets)
 resource "aws_route_table_association" "public" {
   for_each = aws_subnet.public
 
   subnet_id      = each.value.id
-  route_table_id = aws_route_table.public.id
+  route_table_id = aws_route_table.public[0].id
 }
 
 # 10. Route Table Associations (Private Subnets)
+# Trường hợp có NAT Gateway:
 resource "aws_route_table_association" "private" {
   for_each = local.private_subnets_with_nat
 
@@ -122,13 +135,28 @@ resource "aws_route_table_association" "private" {
   route_table_id = aws_route_table.private[each.value.nat_gateway_route_to].id
 }
 
+# Trường hợp không có NAT Gateway:
+resource "aws_route_table_association" "private_no_nat" {
+  for_each = length(local.nat_subnets) == 0 ? var.private_subnets : {}
+
+  subnet_id      = aws_subnet.private[each.key].id
+  route_table_id = aws_route_table.private_no_nat[0].id
+}
+
 # =============================================================================
-# VPC ENDPOINTS CHO ECR VÀ CLOUDWATCH LOGS
+# CẤU HÌNH VPC ENDPOINTS TỔNG QUÁT (GENERIC VPC ENDPOINTS)
 # =============================================================================
 
+locals {
+  interface_endpoints = { for k, v in var.vpc_endpoints : k => v if v.vpc_endpoint_type == "Interface" }
+  create_vpce_sg      = length(local.interface_endpoints) > 0
+}
+
+# Security Group dùng chung cho toàn bộ Interface Endpoints
 resource "aws_security_group" "vpc_endpoints" {
-  name_prefix = "${var.project_name}-vpce-sg"
-  description = "Security group for VPC Endpoints (ECR, Logs)"
+  count       = local.create_vpce_sg ? 1 : 0
+  name        = "${var.project_name}-vpce-sg"
+  description = "Security group for VPC Endpoints"
   vpc_id      = aws_vpc.this.id
 
   ingress {
@@ -143,61 +171,27 @@ resource "aws_security_group" "vpc_endpoints" {
   }
 }
 
-locals {
-  # Lọc ID của private subnets dành cho ứng dụng (app) để gán cho các Interface Endpoints
-  endpoint_subnet_ids = [for key, subnet in aws_subnet.private : subnet.id if var.private_subnets[key].type == "app"]
-}
+# Khởi tạo động toàn bộ các Gateway / Interface Endpoints qua bản đồ vpc_endpoints
+resource "aws_vpc_endpoint" "this" {
+  for_each = var.vpc_endpoints
 
-# 11. Interface Endpoint cho ECR API
-resource "aws_vpc_endpoint" "ecr_api" {
-  vpc_id              = aws_vpc.this.id
-  service_name        = "com.amazonaws.${var.aws_region}.ecr.api"
-  vpc_endpoint_type   = "Interface"
-  private_dns_enabled = true
-  subnet_ids          = local.endpoint_subnet_ids
-  security_group_ids  = [aws_security_group.vpc_endpoints.id]
-
-  tags = {
-    Name = "${var.project_name}-vpce-ecr-api"
-  }
-}
-
-# 12. Interface Endpoint cho ECR DKR
-resource "aws_vpc_endpoint" "ecr_dkr" {
-  vpc_id              = aws_vpc.this.id
-  service_name        = "com.amazonaws.${var.aws_region}.ecr.dkr"
-  vpc_endpoint_type   = "Interface"
-  private_dns_enabled = true
-  subnet_ids          = local.endpoint_subnet_ids
-  security_group_ids  = [aws_security_group.vpc_endpoints.id]
-
-  tags = {
-    Name = "${var.project_name}-vpce-ecr-dkr"
-  }
-}
-
-# 13. Interface Endpoint cho CloudWatch Logs
-resource "aws_vpc_endpoint" "logs" {
-  vpc_id              = aws_vpc.this.id
-  service_name        = "com.amazonaws.${var.aws_region}.logs"
-  vpc_endpoint_type   = "Interface"
-  private_dns_enabled = true
-  subnet_ids          = local.endpoint_subnet_ids
-  security_group_ids  = [aws_security_group.vpc_endpoints.id]
-
-  tags = {
-    Name = "${var.project_name}-vpce-logs"
-  }
-}
-
-# 14. Gateway Endpoint cho S3 (Miễn phí giờ duy trì, ECR dùng S3 để chứa layers)
-resource "aws_vpc_endpoint" "s3" {
   vpc_id            = aws_vpc.this.id
-  service_name      = "com.amazonaws.${var.aws_region}.s3"
-  vpc_endpoint_type = "Gateway"
-  route_table_ids   = [for rt in aws_route_table.private : rt.id]
+  service_name      = each.value.service_name
+  vpc_endpoint_type = each.value.vpc_endpoint_type
+
+  # Cấu hình cụ thể cho Interface Endpoints (ví dụ: Bedrock, ECR, CloudWatch Logs)
+  private_dns_enabled = each.value.vpc_endpoint_type == "Interface" ? each.value.private_dns_enabled : null
+  subnet_ids          = each.value.vpc_endpoint_type == "Interface" ? [for name in each.value.subnet_names : aws_subnet.private[name].id] : null
+  security_group_ids  = each.value.vpc_endpoint_type == "Interface" ? [aws_security_group.vpc_endpoints[0].id] : null
+
+  # Cấu hình cụ thể cho Gateway Endpoints (ví dụ: S3)
+  route_table_ids = each.value.vpc_endpoint_type == "Gateway" ? concat(
+    length(var.public_subnets) > 0 ? [aws_route_table.public[0].id] : [],
+    length(local.nat_subnets) > 0 ? [for rt in aws_route_table.private : rt.id] : [],
+    length(local.nat_subnets) == 0 && length(var.private_subnets) > 0 ? [aws_route_table.private_no_nat[0].id] : []
+  ) : null
 
   tags = {
-    Name = "${var.project_name}-vpce-s3"
+    Name = "${var.project_name}-vpce-${each.key}"
   }
 }

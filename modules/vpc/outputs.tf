@@ -37,5 +37,5 @@ output "rds_subnet_ids" {
 
 output "igw_id" {
   description = "ID của Internet Gateway"
-  value       = aws_internet_gateway.main.id
+  value       = length(aws_internet_gateway.main) > 0 ? aws_internet_gateway.main[0].id : null
 }
