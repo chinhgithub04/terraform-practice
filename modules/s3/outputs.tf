@@ -1,9 +1,14 @@
-output "bucket_id" {
-  description = "Tên (ID) của S3 bucket chứa code frontend"
-  value       = aws_s3_bucket.frontend.id
+locals {
+  bucket_ids  = { for k, b in aws_s3_bucket.this : k => b.id }
+  bucket_arns = { for k, b in aws_s3_bucket.this : k => b.arn }
 }
 
-output "bucket_arn" {
-  description = "ARN của S3 bucket chứa code frontend"
-  value       = aws_s3_bucket.frontend.arn
+output "bucket_ids" {
+  description = "Tên (ID) của các S3 bucket vừa tạo"
+  value       = local.bucket_ids
+}
+
+output "bucket_arns" {
+  description = "ARN của các S3 bucket vừa tạo"
+  value       = local.bucket_arns
 }
