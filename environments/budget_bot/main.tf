@@ -64,3 +64,18 @@ module "api_gateway" {
     }
   }
 }
+
+# 6. Gọi module RDS để khởi tạo cơ sở dữ liệu Single AZ tiết kiệm chi phí
+module "rds" {
+  source = "../../modules/rds"
+
+  project_name          = var.project_name
+  vpc_id                = module.vpc.vpc_id
+  rds_subnet_ids        = module.vpc.rds_subnet_ids
+  db_allocated_storage  = var.rds_db_allocated_storage
+  db_instance_class     = var.rds_db_instance_class
+  db_name               = var.rds_db_name
+  app_security_group_id = module.lambda_sg.security_group_id
+  multi_az              = var.rds_multi_az
+}
+

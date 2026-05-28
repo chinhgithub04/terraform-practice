@@ -77,3 +77,23 @@ variable "api_gateway_routes" {
     route_key = string
   }))
 }
+
+variable "rds_db_allocated_storage" {
+  description = "Dung lượng storage cấp phát cho RDS (GB)"
+  type        = number
+}
+
+variable "rds_db_instance_class" {
+  description = "Instance class cho database (vd: db.t3.micro)"
+  type        = string
+}
+
+variable "rds_db_name" {
+  description = "Tên database khởi tạo"
+  type        = string
+}
+
+variable "rds_multi_az" {
+  description = "Bật/Tắt chế độ Multi-AZ cho RDS"
+  type        = bool
+}

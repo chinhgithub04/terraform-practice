@@ -80,3 +80,10 @@ api_gateway_routes = {
     route_key = "POST /upload"
   }
 }
+
+# Cấu hình RDS Single AZ tiết kiệm tối đa chi phí
+rds_db_allocated_storage = 20
+rds_db_instance_class    = "db.t3.micro"
+rds_db_name              = "budgetdb"
+rds_multi_az             = false
+

@@ -51,3 +51,15 @@ output "api_endpoint" {
   description = "URL Endpoint cơ sở của API Gateway để gọi dịch vụ (ví dụ: https://a1b2c3d4.execute-api.ap-southeast-1.amazonaws.com)"
   value       = module.api_gateway.api_endpoint
 }
+
+# Outputs RDS
+output "rds_db_endpoint" {
+  description = "Connection endpoint của RDS database (đã bao gồm port)"
+  value       = module.rds.rds_db_endpoint
+}
+
+output "rds_db_address" {
+  description = "Địa chỉ hostname của RDS database (không bao gồm port)"
+  value       = module.rds.rds_db_address
+}
+

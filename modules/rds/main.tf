@@ -49,7 +49,7 @@ resource "aws_db_instance" "this" {
   username = "admin"
   password = random_password.db_password.result # self-managed
 
-  multi_az               = true
+  multi_az               = var.multi_az
   port                   = 3306
   db_subnet_group_name   = aws_db_subnet_group.this.name
   vpc_security_group_ids = [aws_security_group.rds.id]
