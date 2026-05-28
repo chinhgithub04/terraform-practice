@@ -24,3 +24,15 @@ variable "lambdas" {
     })), [])
   }))
 }
+
+variable "vpc_subnet_ids" {
+  description = "Danh sách ID các private subnets dùng chung cho tất cả các Lambda (có thể ghi đè ở từng lambda)"
+  type        = list(string)
+  default     = null
+}
+
+variable "vpc_security_group_ids" {
+  description = "Danh sách ID các security groups dùng chung cho tất cả các Lambda (có thể ghi đè ở từng lambda)"
+  type        = list(string)
+  default     = null
+}

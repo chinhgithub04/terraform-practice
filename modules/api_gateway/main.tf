@@ -1,15 +1,3 @@
-# 1. Trích xuất logic lọc danh sách Lambda duy nhất vào locals theo Quy tắc 4
-locals {
-  # Lọc ra danh sách các Lambda ARN duy nhất từ các routes để tránh tạo trùng quyền (Sid Collision)
-  unique_lambda_arns = distinct([
-    for r in var.routes : r.target_lambda_arn
-  ])
-
-  # Chuyển đổi thành map để sử dụng hiệu quả trong for_each
-  unique_lambdas = {
-    for arn in local.unique_lambda_arns : arn => arn
-  }
-}
 
 # 2. Khởi tạo tài nguyên HTTP API Gateway
 resource "aws_apigatewayv2_api" "this" {
@@ -53,7 +41,7 @@ resource "aws_apigatewayv2_stage" "this" {
   }
 
   tags = {
-    Name = "${var.project_name}-api-stage-${var.stage_name}"
+    Name = "${var.project_name}-api-stage-${replace(var.stage_name, "$", "")}"
   }
 }
 
@@ -77,7 +65,7 @@ resource "aws_apigatewayv2_integration" "this" {
 
   api_id                 = aws_apigatewayv2_api.this.id
   integration_type       = "AWS_PROXY"
-  integration_uri        = each.value.target_lambda_arn
+  integration_uri        = var.lambda_arns[each.value.lambda_key]
   payload_format_version = "2.0" # Tiêu chuẩn cho HTTP APIs
 }
 
@@ -96,11 +84,11 @@ resource "aws_apigatewayv2_route" "this" {
 
 # 8. Cấp quyền tự động cho API Gateway để kích hoạt (invoke) các Lambda Backend
 resource "aws_lambda_permission" "api_gateway" {
-  for_each = local.unique_lambdas
+  for_each = var.routes
 
-  statement_id  = "AllowAPIGatewayInvoke-${sha256(each.value)}"
+  statement_id  = "AllowAPIGatewayInvoke-${var.project_name}-${each.key}"
   action        = "lambda:InvokeFunction"
-  function_name = each.value
+  function_name = var.lambda_arns[each.value.lambda_key]
   principal     = "apigateway.amazonaws.com"
   source_arn    = "${aws_apigatewayv2_api.this.execution_arn}/*/*"
 }

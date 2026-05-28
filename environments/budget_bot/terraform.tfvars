@@ -56,28 +56,32 @@ lambda_sg_egress_rules = [
 ]
 
 # Cấu hình chi tiết các hàm Lambda Python
-lambdas_config = {
+lambdas = {
   "chat" = {
     handler     = "index.handler"
     runtime     = "python3.11"
-    memory_size = 128 # Cấu hình siêu tiết kiệm chi phí
-    timeout     = 10  # Đủ thời gian gọi Bedrock API
+    memory_size = 128        # Cấu hình siêu tiết kiệm chi phí
+    timeout     = 10         # Đủ thời gian gọi Bedrock API
+    source_dir  = "src/chat" # Đường dẫn thư mục code nguồn của Chat Lambda
   }
   "upload" = {
     handler     = "index.handler"
     runtime     = "python3.11"
-    memory_size = 256 # Cấu hình lớn hơn con chat để parse file CSV
-    timeout     = 30  # Timeout lớn hơn để xử lý đồng bộ
+    memory_size = 256          # Cấu hình lớn hơn con chat để parse file CSV
+    timeout     = 30           # Timeout lớn hơn để xử lý đồng bộ
+    source_dir  = "src/upload" # Đường dẫn thư mục code nguồn của Upload Lambda
   }
 }
 
 # Cấu hình Routes cho API Gateway
 api_gateway_routes = {
   "chat" = {
-    route_key = "POST /chat"
+    route_key  = "POST /chat"
+    lambda_key = "chat"
   }
   "upload" = {
-    route_key = "POST /upload"
+    route_key  = "POST /upload"
+    lambda_key = "upload"
   }
 }
 

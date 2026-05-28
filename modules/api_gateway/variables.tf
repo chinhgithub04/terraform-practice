@@ -25,8 +25,14 @@ variable "routes" {
   description = "Bản đồ các routes cấu hình cho API Gateway. Key là định danh duy nhất (ví dụ: get_users, create_order)."
   type = map(object({
     route_key         = string # Ví dụ: "GET /users", "POST /orders", "ANY /"
-    target_lambda_arn = string # ARN của Lambda function phục vụ route này
+    lambda_key        = string # Khóa của Lambda trong bản đồ lambda_arns (ví dụ: "chat", "upload")
     enable_authorizer = optional(bool, false)
   }))
   default = {}
+}
+
+variable "lambda_arns" {
+  description = "Bản đồ các ARN của Lambda (để ánh xạ động vào routes theo lambda_key)"
+  type        = map(string)
+  default     = {}
 }

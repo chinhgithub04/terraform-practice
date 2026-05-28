@@ -55,6 +55,8 @@ resource "aws_subnet" "private" {
 locals {
   nat_subnets              = { for k, v in var.public_subnets : k => v if v.type == "nat" }
   private_subnets_with_nat = { for k, v in var.private_subnets : k => v if v.nat_gateway_route_to != null && length(local.nat_subnets) > 0 }
+  app_private_subnets      = { for k, v in var.private_subnets : k => v if v.type == "app" }
+  db_private_subnets       = { for k, v in var.private_subnets : k => v if v.type == "db" }
 }
 
 # 5. Elastic IPs cho các NAT Gateway (chỉ tạo ở subnet public có type là "nat")
@@ -108,13 +110,22 @@ resource "aws_route_table" "private" {
   }
 }
 
-# Kịch bản B: Không có NAT Gateways nhưng có Private Subnets -> Tạo 1 RT chung để định tuyến Gateway Endpoints (ví dụ: S3) miễn phí
-resource "aws_route_table" "private_no_nat" {
-  count  = length(local.nat_subnets) == 0 && length(var.private_subnets) > 0 ? 1 : 0
+# Kịch bản B: Không có NAT Gateways nhưng có Private Subnets -> Tạo Route Tables tách biệt cho App (để đi S3) và DB (cô lập hoàn toàn)
+resource "aws_route_table" "private_app_no_nat" {
+  count  = length(local.nat_subnets) == 0 && length(local.app_private_subnets) > 0 ? 1 : 0
   vpc_id = aws_vpc.this.id
 
   tags = {
-    Name = "${var.project_name}-private-rt"
+    Name = "${var.project_name}-private-app-rt"
+  }
+}
+
+resource "aws_route_table" "private_db_no_nat" {
+  count  = length(local.nat_subnets) == 0 && length(local.db_private_subnets) > 0 ? 1 : 0
+  vpc_id = aws_vpc.this.id
+
+  tags = {
+    Name = "${var.project_name}-private-db-rt"
   }
 }
 
@@ -136,11 +147,18 @@ resource "aws_route_table_association" "private" {
 }
 
 # Trường hợp không có NAT Gateway:
-resource "aws_route_table_association" "private_no_nat" {
-  for_each = length(local.nat_subnets) == 0 ? var.private_subnets : {}
+resource "aws_route_table_association" "private_app_no_nat" {
+  for_each = length(local.nat_subnets) == 0 ? local.app_private_subnets : {}
 
   subnet_id      = aws_subnet.private[each.key].id
-  route_table_id = aws_route_table.private_no_nat[0].id
+  route_table_id = aws_route_table.private_app_no_nat[0].id
+}
+
+resource "aws_route_table_association" "private_db_no_nat" {
+  for_each = length(local.nat_subnets) == 0 ? local.db_private_subnets : {}
+
+  subnet_id      = aws_subnet.private[each.key].id
+  route_table_id = aws_route_table.private_db_no_nat[0].id
 }
 
 # =============================================================================
@@ -166,6 +184,14 @@ resource "aws_security_group" "vpc_endpoints" {
     cidr_blocks = [aws_vpc.this.cidr_block]
   }
 
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+    description = "Allow all outbound IPv4 traffic from endpoints"
+  }
+
   tags = {
     Name = "${var.project_name}-vpce-sg"
   }
@@ -188,7 +214,7 @@ resource "aws_vpc_endpoint" "this" {
   route_table_ids = each.value.vpc_endpoint_type == "Gateway" ? concat(
     length(var.public_subnets) > 0 ? [aws_route_table.public[0].id] : [],
     length(local.nat_subnets) > 0 ? [for rt in aws_route_table.private : rt.id] : [],
-    length(local.nat_subnets) == 0 && length(var.private_subnets) > 0 ? [aws_route_table.private_no_nat[0].id] : []
+    length(local.nat_subnets) == 0 && length(local.app_private_subnets) > 0 ? [aws_route_table.private_app_no_nat[0].id] : []
   ) : null
 
   tags = {

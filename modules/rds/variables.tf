@@ -32,3 +32,9 @@ variable "app_security_group_id" {
   description = "ID của Security group app để allow truy cập vào RDS"
   type        = string
 }
+
+variable "multi_az" {
+  description = "Bật/Tắt chế độ Multi-AZ cho độ tin cậy cao (true hoặc false)"
+  type        = bool
+  default     = true
+}

@@ -33,36 +33,24 @@ module "lambda_sg" {
   egress_rules   = var.lambda_sg_egress_rules
 }
 
-# 4. Gọi module Lambda để khởi tạo 2 con Lambda chạy Python trong VPC thông qua vòng lặp động
+# 4. Gọi module Lambda để khởi tạo các hàm Lambda trong VPC một cách sạch sẽ
 module "lambda" {
   source = "../../modules/lambda"
 
-  project_name = var.project_name
-  lambdas = {
-    for k, v in var.lambdas_config : k => {
-      handler                = v.handler
-      runtime                = v.runtime
-      memory_size            = v.memory_size
-      timeout                = v.timeout
-      source_dir             = "${path.module}/src/${k}"
-      vpc_subnet_ids         = module.vpc.app_subnet_ids
-      vpc_security_group_ids = [module.lambda_sg.security_group_id]
-    }
-  }
+  project_name           = var.project_name
+  vpc_subnet_ids         = module.vpc.app_subnet_ids
+  vpc_security_group_ids = [module.lambda_sg.security_group_id]
+  lambdas                = var.lambdas
 }
 
-# 5. Gọi module API Gateway để tạo HTTP API định tuyến tới các Lambda thông qua vòng lặp động
+# 5. Gọi module API Gateway để tạo HTTP API định tuyến tới các Lambda một cách sạch sẽ
 module "api_gateway" {
   source = "../../modules/api_gateway"
 
   project_name = var.project_name
   stage_name   = "$default"
-  routes = {
-    for k, v in var.api_gateway_routes : k => {
-      route_key         = v.route_key
-      target_lambda_arn = module.lambda.lambda_arns[k]
-    }
-  }
+  lambda_arns  = module.lambda.lambda_arns
+  routes       = var.api_gateway_routes
 }
 
 # 6. Gọi module RDS để khởi tạo cơ sở dữ liệu Single AZ tiết kiệm chi phí

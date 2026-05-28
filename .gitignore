@@ -43,3 +43,6 @@ terraform.rc
 # planout
 
 .env
+
+# Ignore dynamically generated Lambda ZIP files
+modules/lambda/files/*.zip

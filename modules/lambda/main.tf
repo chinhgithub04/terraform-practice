@@ -4,9 +4,9 @@ locals {
     for k, v in var.lambdas : k => v if v.source_dir != null
   }
 
-  # Lọc các lambda được chỉ định chạy trong VPC
+  # Lọc các lambda được chỉ định chạy trong VPC (cá nhân hoặc dùng chung cấp module)
   lambdas_in_vpc = {
-    for k, v in var.lambdas : k => v if v.vpc_subnet_ids != null && length(v.vpc_subnet_ids) > 0
+    for k, v in var.lambdas : k => v if(v.vpc_subnet_ids != null && length(v.vpc_subnet_ids) > 0) || (var.vpc_subnet_ids != null && length(var.vpc_subnet_ids) > 0)
   }
 
   # Lọc các lambda có định nghĩa các quyền hạn IAM tùy chỉnh (custom IAM statements)
@@ -121,10 +121,10 @@ resource "aws_lambda_function" "this" {
 
   # Cấu hình VPC động
   dynamic "vpc_config" {
-    for_each = each.value.vpc_subnet_ids != null && each.value.vpc_security_group_ids != null ? [1] : []
+    for_each = (each.value.vpc_subnet_ids != null || var.vpc_subnet_ids != null) && (each.value.vpc_security_group_ids != null || var.vpc_security_group_ids != null) ? [1] : []
     content {
-      subnet_ids         = each.value.vpc_subnet_ids
-      security_group_ids = each.value.vpc_security_group_ids
+      subnet_ids         = each.value.vpc_subnet_ids != null ? each.value.vpc_subnet_ids : var.vpc_subnet_ids
+      security_group_ids = each.value.vpc_security_group_ids != null ? each.value.vpc_security_group_ids : var.vpc_security_group_ids
     }
   }
 
