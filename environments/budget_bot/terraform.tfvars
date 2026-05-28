@@ -43,3 +43,40 @@ vpc_endpoints = {
     subnet_names        = ["private-app-a"] # Tiết kiệm 50% chi phí: chỉ triển khai Endpoint ở 1 AZ (us-east-1a)
   }
 }
+
+# Cấu hình Security Group Rule (IPv4 Outbound)
+lambda_sg_egress_rules = [
+  {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+    description = "Allow all outbound IPv4 traffic"
+  }
+]
+
+# Cấu hình chi tiết các hàm Lambda Python
+lambdas_config = {
+  "chat" = {
+    handler     = "index.handler"
+    runtime     = "python3.11"
+    memory_size = 128 # Cấu hình siêu tiết kiệm chi phí
+    timeout     = 10  # Đủ thời gian gọi Bedrock API
+  }
+  "upload" = {
+    handler     = "index.handler"
+    runtime     = "python3.11"
+    memory_size = 256 # Cấu hình lớn hơn con chat để parse file CSV
+    timeout     = 30  # Timeout lớn hơn để xử lý đồng bộ
+  }
+}
+
+# Cấu hình Routes cho API Gateway
+api_gateway_routes = {
+  "chat" = {
+    route_key = "POST /chat"
+  }
+  "upload" = {
+    route_key = "POST /upload"
+  }
+}

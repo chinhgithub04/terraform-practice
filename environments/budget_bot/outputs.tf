@@ -31,6 +31,23 @@ output "private_subnet_ids" {
 }
 
 output "rds_subnet_ids" {
-  description = "Danh sách ID của các subnet private dùng cho RDS và Lambda"
+  description = "Danh sách ID của các subnet private dùng cho RDS"
   value       = module.vpc.rds_subnet_ids
+}
+
+# Outputs Lambda
+output "lambda_function_names" {
+  description = "Tên của các hàm Lambda đã khởi tạo"
+  value       = module.lambda.lambda_function_names
+}
+
+output "lambda_arns" {
+  description = "ARN của các hàm Lambda đã khởi tạo"
+  value       = module.lambda.lambda_arns
+}
+
+# Outputs API Gateway
+output "api_endpoint" {
+  description = "URL Endpoint cơ sở của API Gateway để gọi dịch vụ (ví dụ: https://a1b2c3d4.execute-api.ap-southeast-1.amazonaws.com)"
+  value       = module.api_gateway.api_endpoint
 }

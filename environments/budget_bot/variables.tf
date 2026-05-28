@@ -25,6 +25,7 @@ variable "public_subnets" {
     availability_zone = string
     type              = string # "alb" hoặc "nat"
   }))
+  default = {}
 }
 
 variable "private_subnets" {
@@ -35,6 +36,7 @@ variable "private_subnets" {
     type                 = string           # "app" hoặc "db"
     nat_gateway_route_to = optional(string) # Khóa của public subnet chứa NAT Gateway tương ứng, có thể null.
   }))
+  default = {}
 }
 
 variable "vpc_endpoints" {
@@ -46,4 +48,32 @@ variable "vpc_endpoints" {
     subnet_names        = optional(list(string), [])
   }))
   default = {}
+}
+
+variable "lambda_sg_egress_rules" {
+  description = "Danh sách các luật egress cho Lambda Security Group (IPv4 outbound)"
+  type = list(object({
+    from_port   = number
+    to_port     = number
+    protocol    = string
+    cidr_blocks = list(string)
+    description = optional(string)
+  }))
+}
+
+variable "lambdas_config" {
+  description = "Bản đồ cấu hình chi tiết cho các hàm Lambda cần tạo"
+  type = map(object({
+    handler     = string
+    runtime     = string
+    memory_size = number
+    timeout     = number
+  }))
+}
+
+variable "api_gateway_routes" {
+  description = "Bản đồ cấu hình các routes cho API Gateway"
+  type = map(object({
+    route_key = string
+  }))
 }
