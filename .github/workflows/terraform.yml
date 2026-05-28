@@ -2,7 +2,7 @@ name: 'Terraform Infrastructure'
 
 on:
   push:
-    branches: ['main', 'dev', 'production']
+    branches: ['main', 'dev', 'production', 'budget_bot']
   pull_request:
     branches: ['main']
 
@@ -25,7 +25,8 @@ jobs:
       # 1. Checkout code from the repository
       - name: Checkout
         uses: actions/checkout@v4
-        # 2. Determine which environment to deploy
+
+      # 2. Determine which environment to deploy
       - name: Determine Environment
         id: environment
         run: |
@@ -35,42 +36,52 @@ jobs:
           elif [ "${{ github.ref }}" == "refs/heads/production" ]; then
             echo "env_path=environments/prod" >> $GITHUB_OUTPUT
             echo "env_name=prod" >> $GITHUB_OUTPUT
+          elif [ "${{ github.ref }}" == "refs/heads/budget_bot" ]; then
+            echo "env_path=environments/budget_bot" >> $GITHUB_OUTPUT
+            echo "env_name=budget_bot" >> $GITHUB_OUTPUT
           else
             echo "env_path=environments/dev" >> $GITHUB_OUTPUT
             echo "env_name=main" >> $GITHUB_OUTPUT
           fi
-        # 3. Configure AWS Credentials using the role ARN stored in GitHub Secrets
+
+      # 3. Configure AWS Credentials using the role ARN stored in GitHub Secrets
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: ${{ secrets.AWS_ROLE_ARN }} # Secret đã tạo ở GitHub
           aws-region: us-east-1
-        # 4. Setup Terraform CLI
+
+      # 4. Setup Terraform CLI
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
-        # 5. Initialize Terraform
+
+      # 5. Initialize Terraform
       - name: Terraform Init
         run: |
           cd ${{ steps.environment.outputs.env_path }}
           terraform init
-        # 6. Format Terraform files
+
+      # 6. Format Terraform files
       - name: Terraform Format
         run: |
           cd ${{ steps.environment.outputs.env_path }}
           terraform fmt -check # -check có nghĩa là chỉ kiểm tra định dạng mà không sửa lỗi, nếu có lỗi sẽ làm cho bước này thất bại
-        # 7. Validate Terraform configuration
+
+      # 7. Validate Terraform configuration
       - name: Terraform Validate
         run: |
           cd ${{ steps.environment.outputs.env_path }}
           terraform validate
-        # 8. Plan Terraform changes
+
+      # 8. Plan Terraform changes
       - name: Terraform Plan
         run: |
           cd ${{ steps.environment.outputs.env_path }}
           terraform plan -input=false -out=tfplan # -out=tfplan sẽ lưu kế hoạch vào file tfplan để sử dụng ở bước apply sau này
-        # 9. Apply Terraform changes (chỉ khi push vào dev hoặc production)
+
+      # 9. Apply Terraform changes (chỉ khi push vào dev, production hoặc budget_bot)
       - name: Terraform Apply
-        if: (github.ref == 'refs/heads/dev' || github.ref == 'refs/heads/production') && github.event_name == 'push'
+        if: (github.ref == 'refs/heads/dev' || github.ref == 'refs/heads/production' || github.ref == 'refs/heads/budget_bot') && github.event_name == 'push'
         run: |
           cd ${{ steps.environment.outputs.env_path }}
-          terraform apply -input=false tfplan # -tfplan sẽ áp dụng kế hoạch đã được lưu ở bước plan trước đó
+          terraform apply -input=false tfplan # tfplan sẽ áp dụng kế hoạch đã được lưu ở bước plan trước đó
