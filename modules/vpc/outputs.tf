@@ -39,3 +39,14 @@ output "igw_id" {
   description = "ID của Internet Gateway"
   value       = length(aws_internet_gateway.main) > 0 ? aws_internet_gateway.main[0].id : null
 }
+
+output "private_subnet_ids_map" {
+  description = "Bản đồ ID của các subnet private theo key"
+  value       = { for k, s in aws_subnet.private : k => s.id }
+}
+
+output "private_route_table_ids_map" {
+  description = "Bản đồ ID của các private route table theo key"
+  value       = { for k, rt in aws_route_table.private : k => rt.id }
+}
+

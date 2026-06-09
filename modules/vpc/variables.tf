@@ -3,11 +3,6 @@ variable "aws_region" {
   type        = string
 }
 
-variable "availability_zones" {
-  description = "Danh sách các Availability Zones để triển khai tài nguyên"
-  type        = list(string)
-}
-
 variable "project_name" {
   description = "Tên dự án để gán tag"
   type        = string
@@ -26,6 +21,11 @@ variable "public_subnets" {
     type              = string # "alb" hoặc "nat"
   }))
   default = {}
+
+  validation {
+    condition     = alltrue([for s in var.public_subnets : contains(["alb", "nat"], s.type)])
+    error_message = "Mỗi public subnet type phải là 'alb' hoặc 'nat'."
+  }
 }
 
 variable "private_subnets" {
@@ -37,15 +37,11 @@ variable "private_subnets" {
     nat_gateway_route_to = optional(string) # Khóa của public subnet chứa NAT Gateway tương ứng, có thể null.
   }))
   default = {}
+
+  validation {
+    condition     = alltrue([for s in var.private_subnets : contains(["app", "db"], s.type)])
+    error_message = "Mỗi private subnet type phải là 'app' hoặc 'db'."
+  }
 }
 
-variable "vpc_endpoints" {
-  description = "Bản đồ các VPC Endpoints cần tạo. Hỗ trợ cả Gateway Endpoints (như S3) và Interface Endpoints (như Bedrock, ECR)."
-  type = map(object({
-    service_name        = string                     # Tên dịch vụ AWS đầy đủ (ví dụ: com.amazonaws.us-east-1.s3)
-    vpc_endpoint_type   = string                     # "Gateway" hoặc "Interface"
-    private_dns_enabled = optional(bool, false)      # Kích hoạt Private DNS (chỉ áp dụng cho Interface Endpoint)
-    subnet_names        = optional(list(string), []) # Danh sách các khóa private subnets để đặt endpoint (chỉ áp dụng cho Interface Endpoint)
-  }))
-  default = {}
-}
+
