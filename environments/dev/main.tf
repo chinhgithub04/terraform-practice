@@ -1,12 +1,11 @@
 module "vpc" {
   source = "../../modules/vpc"
 
-  aws_region         = var.aws_region
-  project_name       = var.project_name
-  availability_zones = var.availability_zones
-  vpc_cidr           = var.vpc_cidr
-  public_subnets     = var.public_subnets
-  private_subnets    = var.private_subnets
+  aws_region      = var.aws_region
+  project_name    = var.project_name
+  vpc_cidr        = var.vpc_cidr
+  public_subnets  = var.public_subnets
+  private_subnets = var.private_subnets
 }
 
 module "alb" {

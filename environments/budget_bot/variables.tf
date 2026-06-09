@@ -45,7 +45,8 @@ variable "vpc_endpoints" {
     service_name        = string
     vpc_endpoint_type   = string
     private_dns_enabled = optional(bool, false)
-    subnet_names        = optional(list(string), [])
+    subnet_keys         = optional(list(string), [])
+    route_table_keys    = optional(list(string), [])
   }))
   default = {}
 }

@@ -35,12 +35,13 @@ vpc_endpoints = {
   "s3" = {
     service_name      = "com.amazonaws.us-east-1.s3"
     vpc_endpoint_type = "Gateway"
+    route_table_keys  = ["private-app-a", "private-app-b"]
   }
   "bedrock-runtime" = {
     service_name        = "com.amazonaws.us-east-1.bedrock-runtime"
     vpc_endpoint_type   = "Interface"
     private_dns_enabled = true
-    subnet_names        = ["private-app-a"] # Tiết kiệm 50% chi phí: chỉ triển khai Endpoint ở 1 AZ (us-east-1a)
+    subnet_keys         = ["private-app-a"] # Tiết kiệm 50% chi phí: chỉ triển khai Endpoint ở 1 AZ (us-east-1a)
   }
 }
 

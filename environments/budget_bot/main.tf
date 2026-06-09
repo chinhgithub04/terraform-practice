@@ -13,13 +13,23 @@ module "s3" {
 module "vpc" {
   source = "../../modules/vpc"
 
-  aws_region         = var.aws_region
-  project_name       = var.project_name
-  availability_zones = var.availability_zones
-  vpc_cidr           = var.vpc_cidr
-  public_subnets     = var.public_subnets
-  private_subnets    = var.private_subnets
-  vpc_endpoints      = var.vpc_endpoints
+  aws_region      = var.aws_region
+  project_name    = var.project_name
+  vpc_cidr        = var.vpc_cidr
+  public_subnets  = var.public_subnets
+  private_subnets = var.private_subnets
+}
+
+# 2.1. Gọi module VPC Endpoint để khởi tạo kết nối riêng tư tới AWS Services (như S3, Bedrock)
+module "vpc_endpoint" {
+  source = "../../modules/vpc_endpoint"
+
+  vpc_id                  = module.vpc.vpc_id
+  vpc_cidr                = module.vpc.vpc_cidr
+  project_name            = var.project_name
+  vpc_endpoints           = var.vpc_endpoints
+  private_subnet_ids      = module.vpc.private_subnet_ids_map
+  private_route_table_ids = module.vpc.private_route_table_ids_map
 }
 
 # 3. Gọi module Security Group để khởi tạo nhóm bảo mật cho Lambda (IPv4 only)
