@@ -3,18 +3,28 @@ resource "aws_security_group" "alb" {
   description = "Security group for ALB"
   vpc_id      = var.vpc_id
 
-  ingress {
-    from_port   = 80
-    to_port     = 80
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
+  dynamic "ingress" {
+    for_each = var.ingress_rules
+    content {
+      from_port       = ingress.value.from_port
+      to_port         = ingress.value.to_port
+      protocol        = ingress.value.protocol
+      cidr_blocks     = ingress.value.cidr_blocks
+      security_groups = ingress.value.security_groups
+      description     = ingress.value.description
+    }
   }
 
-  egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
+  dynamic "egress" {
+    for_each = var.egress_rules
+    content {
+      from_port       = egress.value.from_port
+      to_port         = egress.value.to_port
+      protocol        = egress.value.protocol
+      cidr_blocks     = egress.value.cidr_blocks
+      security_groups = egress.value.security_groups
+      description     = egress.value.description
+    }
   }
 
   tags = {
@@ -24,20 +34,21 @@ resource "aws_security_group" "alb" {
 
 resource "aws_lb_target_group" "app" {
   name        = "${var.project_name}-tg"
-  port        = 8080
-  protocol    = "HTTP"
+  port        = var.target_port
+  protocol    = var.target_protocol
   vpc_id      = var.vpc_id
-  target_type = "ip"
+  target_type = var.target_type
 
   health_check {
-    enabled             = true
-    healthy_threshold   = 2
-    unhealthy_threshold = 2
-    timeout             = 5
-    interval            = 30
-    path                = "/"
-    matcher             = "200"
-    protocol            = "HTTP"
+    enabled             = var.health_check.enabled
+    path                = var.health_check.path
+    port                = var.health_check.port
+    protocol            = var.health_check.protocol
+    timeout             = var.health_check.timeout
+    interval            = var.health_check.interval
+    healthy_threshold   = var.health_check.healthy_threshold
+    unhealthy_threshold = var.health_check.unhealthy_threshold
+    matcher             = var.health_check.matcher
   }
 
   tags = {
@@ -47,7 +58,7 @@ resource "aws_lb_target_group" "app" {
 
 resource "aws_lb" "this" {
   name               = "${var.project_name}-alb"
-  internal           = false
+  internal           = var.internal
   load_balancer_type = "application"
   security_groups    = [aws_security_group.alb.id]
   subnets            = var.alb_subnet_ids
@@ -59,8 +70,10 @@ resource "aws_lb" "this" {
 
 resource "aws_lb_listener" "http" {
   load_balancer_arn = aws_lb.this.arn
-  port              = 80
-  protocol          = "HTTP"
+  port              = var.listener_port
+  protocol          = var.listener_protocol
+  ssl_policy        = var.listener_protocol == "HTTPS" ? "ELBSecurityPolicy-2016-08" : null
+  certificate_arn   = var.listener_protocol == "HTTPS" ? var.certificate_arn : null
 
   default_action {
     type             = "forward"
